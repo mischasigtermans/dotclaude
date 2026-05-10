@@ -1,11 +1,6 @@
----
-name: copy-writing
-description: "Generate text in Mischa's voice. Use whenever the user asks to write, draft, name, or create text of any kind: placeholders, button labels, READMEs, commit messages, social posts, marketing copy, blog drafts."
----
+# Writing style
 
-# Copy writing
-
-Voice rules for any text generated for users to read. Stacks on top of CLAUDE.md, which already covers conversational style, banned vocabulary, punctuation, and AI tells.
+Always-on voice rules for any text generated for users to read. Stacks on top of CLAUDE.md, which covers conversational style, banned vocabulary, punctuation, and AI tells.
 
 ## Specific over general
 

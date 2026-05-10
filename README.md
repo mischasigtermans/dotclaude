@@ -27,9 +27,9 @@ The split keeps the always-on context lean. Rules pay the token cost every sessi
 ├── rules/
 │   ├── projects.md         # Where my projects live
 │   ├── rtk.md              # rtk hook usage
-│   └── team-workflow.md    # When to use agent teams
+│   ├── team-workflow.md    # When to use agent teams
+│   └── writing-style.md    # Voice for any user-facing copy
 └── skills/
-    ├── copy-writing/       # Voice for any user-facing copy
     ├── counselors/         # External, see below
     ├── laravel-forge-cli/  # Operate Forge servers and sites via the forge CLI
     └── ui/                 # External, see below
@@ -37,31 +37,31 @@ The split keeps the always-on context lean. Rules pay the token cost every sessi
 
 ## My rules
 
-Three rules I authored.
-
 - **[`rules/projects.md`](rules/projects.md)**: where my projects live (`~/Github`, `~/Github/mischasigtermans`, `~/Sites`). So Claude checks those paths first when I name a project.
 
 - **[`rules/rtk.md`](rules/rtk.md)**: how to use the rtk tool. Reminds Claude that a hook is rewriting commands, and what to do when output looks empty or filtered.
 
 - **[`rules/team-workflow.md`](rules/team-workflow.md)**: when to use Claude Code's team-of-agents feature, and when not to. Always-on because the decision happens upfront before any work starts. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (already set in this repo's `settings.json`).
 
+- **[`rules/writing-style.md`](rules/writing-style.md)**: voice rules for any user-facing text. Word swaps, number formatting, banned engagement-bait closers. Lives in rules instead of skills because writing happens incidentally inside other tasks (drafting a README mid-build, naming a function, writing a commit message), and a skill that needs an explicit trigger gets missed in those cases. The rule pays a small token cost every session; the skill paid zero cost when I remembered to invoke it and full cost in voice drift when I didn't.
+
 ## My skills
-
-Two skills I authored.
-
-- **[`skills/copy-writing/`](skills/copy-writing/SKILL.md)**: voice rules for any user-facing text. Triggers when I ask Claude to write, draft, name, or create copy. Stacks on the conversational style in CLAUDE.md but adds copy-specific guidance: word swaps, number formatting, banned engagement-bait closers. Stops Claude from defaulting to generic AI prose when generating button labels, READMEs, commit messages, or social posts.
 
 - **[`skills/laravel-forge-cli/`](skills/laravel-forge-cli/SKILL.md)**: how to operate Laravel Forge servers via the `forge` CLI. Triggers on deploy, prod logs, env pull/push, restart-php-fpm, and similar ops verbs. Saves me from re-explaining the CLI shape every time and keeps Claude from improvising with `curl` for things the CLI does cleanly.
 
-### Borrow one
+## Borrow one
 
-Single-file rules and skills can be dropped in with a one-liner. Example for `laravel-forge-cli`:
+Single-file rules and skills drop in with a one-liner. Example for `writing-style`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mischasigtermans/dotclaude/main/rules/writing-style.md -o ~/.claude/rules/writing-style.md
+```
+
+Same pattern for any other rule. For a skill, swap `rules` for `skills` in both the URL and the target path, and create the skill directory first:
 
 ```bash
 mkdir -p ~/.claude/skills/laravel-forge-cli && curl -fsSL https://raw.githubusercontent.com/mischasigtermans/dotclaude/main/skills/laravel-forge-cli/SKILL.md -o ~/.claude/skills/laravel-forge-cli/SKILL.md
 ```
-
-Same pattern for any of the others. Swap `skills` for `rules` if you're grabbing a rule, and update the name in both the URL and the target path.
 
 ## External dependencies
 
