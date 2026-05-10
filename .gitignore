@@ -35,3 +35,4 @@
 
 # rtk auto-regenerates this checksum on first run; no value committing it
 hooks/.rtk-hook.sha256
+parley-session
