@@ -1,0 +1,68 @@
+{
+  "fileSuggestion": {
+    "type": "command",
+    "command": "echo"
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_NO_FLICKER": "1",
+    "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet"
+  },
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [],
+    "defaultMode": "default"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/rtk-rewrite.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/statusline-wrapper.sh",
+    "padding": 0
+  },
+  "enabledPlugins": {
+    "codex@openai-codex": true,
+    "frontend-design@claude-plugins-official": true,
+    "ralph@rydeventures-claude-plugins": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
+    "telegram@claude-plugins-official": true,
+    "parley@rydeventures-claude-plugins": true,
+    "personas@rydeventures-claude-plugins": true,
+    "code-simplifier@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "helpscout-mcp": {
+      "source": {
+        "source": "github",
+        "repo": "drewburchfield/help-scout-mcp-server"
+      }
+    },
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    }
+  },
+  "effortLevel": "high",
+  "autoUpdatesChannel": "latest",
+  "autoDreamEnabled": true,
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "light",
+  "verbose": true,
+  "teammateMode": "in-process"
+}

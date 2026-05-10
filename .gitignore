@@ -1,0 +1,37 @@
+# Whitelist: ignore everything by default, allow only explicit paths.
+# Keeps secrets, settings, plugin caches, memory, project data, and logs out of git.
+# To add anything new to the repo, add it explicitly below. Don't disable the whitelist.
+
+# Ignore everything
+*
+
+# Allow git internals
+!.gitignore
+!.gitattributes
+
+# Allow repo docs
+!README.md
+!LICENSE
+
+# Allow the agent definition
+!CLAUDE.md
+
+# Allow shareable settings (no local overrides, no caches)
+!settings.json
+!statusline-wrapper.sh
+!statusline-command.sh
+
+# Allow rules (recursively)
+!rules/
+!rules/**
+
+# Allow skills (recursively)
+!skills/
+!skills/**
+
+# Allow hooks (recursively)
+!hooks/
+!hooks/**
+
+# rtk auto-regenerates this checksum on first run; no value committing it
+hooks/.rtk-hook.sha256
