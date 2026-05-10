@@ -18,42 +18,50 @@ The split keeps the always-on context lean. Rules pay the token cost every sessi
 
 ```
 .
-├── CLAUDE.md             # Communication, coding discipline, hard rules
-├── settings.json         # Env vars, hook config, status line, plugin enablement
-├── statusline-wrapper.sh # Status line composition
-├── statusline-command.sh # Git info for the status line
+├── CLAUDE.md               # Communication, coding discipline, hard rules
+├── settings.json           # Env vars, hook config, status line, plugin enablement
+├── statusline-wrapper.sh   # Status line composition
+├── statusline-command.sh   # Git info for the status line
 ├── hooks/
-│   └── rtk-rewrite.sh    # Token-saving Bash hook
+│   └── rtk-rewrite.sh      # Token-saving Bash hook
 ├── rules/
-│   ├── projects.md       # Where my projects live
-│   ├── rtk.md            # rtk hook usage
-│   └── team-workflow.md
+│   ├── projects.md         # Where my projects live
+│   ├── rtk.md              # rtk hook usage
+│   └── team-workflow.md    # When to use agent teams
 └── skills/
-    ├── copy-writing/     # Voice for any user-facing copy
-    ├── counselors/       # External, see below
-    ├── laravel-forge-cli/ # Operate Forge servers and sites via the forge CLI
-    └── ui/               # External, see below
+    ├── copy-writing/       # Voice for any user-facing copy
+    ├── counselors/         # External, see below
+    ├── laravel-forge-cli/  # Operate Forge servers and sites via the forge CLI
+    └── ui/                 # External, see below
 ```
+
+## My rules
+
+Three rules I authored.
+
+- **[`rules/projects.md`](rules/projects.md)**: where my projects live (`~/Github`, `~/Github/mischasigtermans`, `~/Sites`). So Claude checks those paths first when I name a project.
+
+- **[`rules/rtk.md`](rules/rtk.md)**: how to use the rtk tool. Reminds Claude that a hook is rewriting commands, and what to do when output looks empty or filtered.
+
+- **[`rules/team-workflow.md`](rules/team-workflow.md)**: when to use Claude Code's team-of-agents feature, and when not to. Always-on because the decision happens upfront before any work starts. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (already set in this repo's `settings.json`).
 
 ## My skills
 
-Three of these I authored myself.
+Two skills I authored.
 
-- **`skills/copy-writing/`**: voice rules for any user-facing text. Triggers when I ask Claude to write, draft, name, or create copy. Stacks on the conversational style in CLAUDE.md but adds copy-specific guidance: word swaps, number formatting, banned engagement-bait closers. Stops Claude from defaulting to generic AI prose when generating button labels, READMEs, commit messages, or social posts.
+- **[`skills/copy-writing/`](skills/copy-writing/SKILL.md)**: voice rules for any user-facing text. Triggers when I ask Claude to write, draft, name, or create copy. Stacks on the conversational style in CLAUDE.md but adds copy-specific guidance: word swaps, number formatting, banned engagement-bait closers. Stops Claude from defaulting to generic AI prose when generating button labels, READMEs, commit messages, or social posts.
 
-- **`skills/laravel-forge-cli/`**: how to operate Laravel Forge servers via the `forge` CLI. Triggers on deploy, prod logs, env pull/push, restart-php-fpm, and similar ops verbs. Saves me from re-explaining the CLI shape every time and keeps Claude from improvising with `curl` for things the CLI does cleanly.
-
-- **`rules/team-workflow.md`**: when to use Claude Code's team-of-agents feature, and when not to. A rule, not a skill, because the decision happens upfront before any work starts. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (already set in this repo's `settings.json`).
+- **[`skills/laravel-forge-cli/`](skills/laravel-forge-cli/SKILL.md)**: how to operate Laravel Forge servers via the `forge` CLI. Triggers on deploy, prod logs, env pull/push, restart-php-fpm, and similar ops verbs. Saves me from re-explaining the CLI shape every time and keeps Claude from improvising with `curl` for things the CLI does cleanly.
 
 ### Borrow one
 
-Single-file skills can be dropped in with a one-liner. Example for `laravel-forge-cli`:
+Single-file rules and skills can be dropped in with a one-liner. Example for `laravel-forge-cli`:
 
 ```bash
 mkdir -p ~/.claude/skills/laravel-forge-cli && curl -fsSL https://raw.githubusercontent.com/mischasigtermans/dotclaude/main/skills/laravel-forge-cli/SKILL.md -o ~/.claude/skills/laravel-forge-cli/SKILL.md
 ```
 
-Same pattern for any of the others. Swap the name in the URL and the target path.
+Same pattern for any of the others. Swap `skills` for `rules` if you're grabbing a rule, and update the name in both the URL and the target path.
 
 ## External dependencies
 
