@@ -9,7 +9,7 @@ This isn't a template to clone wholesale. The voice rules, project paths, and bi
 Three layers, three roles.
 
 - **CLAUDE.md**: the agent. How it talks, how it codes. Always on.
-- **rules/**: always-on add-ons. Auto-load every session. Use for context that should always be present (style, tools, coordination patterns).
+- **rules/**: always-on add-ons. Auto-load every session. Use for context that should always be present (project paths, tools, coordination patterns).
 - **skills/**: trigger on intent. Load only when matched against the user's message. Use for behavior that activates for specific tasks (writing copy, deploying, reviewing).
 
 The split keeps the always-on context lean. Rules pay the token cost every session, skills only when invoked. Anything the agent should know all the time goes in rules. Anything that only matters for a class of task goes in skills.
@@ -27,10 +27,10 @@ The split keeps the always-on context lean. Rules pay the token cost every sessi
 ├── rules/
 │   ├── projects.md         # Where my projects live
 │   ├── rtk.md              # rtk hook usage
-│   ├── team-workflow.md    # When to use agent teams
-│   └── writing-style.md    # Voice for any user-facing copy
+│   └── team-workflow.md    # When to use agent teams
 └── skills/
     ├── counselors/         # External, see below
+    ├── docs/               # House style for READMEs, CHANGELOGs, and repo boilerplate
     ├── laravel-forge-cli/  # Operate Forge servers and sites via the forge CLI
     └── ui/                 # External, see below
 ```
@@ -43,18 +43,20 @@ The split keeps the always-on context lean. Rules pay the token cost every sessi
 
 - **[`rules/team-workflow.md`](rules/team-workflow.md)**: when to use Claude Code's team-of-agents feature, and when not to. Always-on because the decision happens upfront before any work starts. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (already set in this repo's `settings.json`).
 
-- **[`rules/writing-style.md`](rules/writing-style.md)**: voice rules for any user-facing text. Word swaps, number formatting, banned engagement-bait closers. Lives in rules instead of skills because writing happens incidentally inside other tasks (drafting a README mid-build, naming a function, writing a commit message), and a skill that needs an explicit trigger gets missed in those cases. The rule pays a small token cost every session; the skill paid zero cost when I remembered to invoke it and full cost in voice drift when I didn't.
+Voice rules used to live in `rules/writing-style.md`. They've been folded into [`CLAUDE.md`](CLAUDE.md) under 'How you write', since writing happens incidentally inside other tasks (drafting a README mid-build, naming a function, writing a commit message) and the agent definition is the right place for an always-on style.
 
 ## My skills
+
+- **[`skills/docs/`](skills/docs/SKILL.md)**: how my repos document themselves. Triggers on writing or restructuring READMEs, CHANGELOGs, `.github/` files, commit messages, or release tagging. Detects the ecosystem from the repo (Claude Code plugin, Laravel package, app) and loads the matching conventions. The skill is the source of truth; individual repos catch up to it, not the other way around.
 
 - **[`skills/laravel-forge-cli/`](skills/laravel-forge-cli/SKILL.md)**: how to operate Laravel Forge servers via the `forge` CLI. Triggers on deploy, prod logs, env pull/push, restart-php-fpm, and similar ops verbs. Saves me from re-explaining the CLI shape every time and keeps Claude from improvising with `curl` for things the CLI does cleanly.
 
 ## Borrow one
 
-Single-file rules and skills drop in with a one-liner. Example for `writing-style`:
+Single-file rules and skills drop in with a one-liner. Example for `team-workflow`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/mischasigtermans/dotclaude/main/rules/writing-style.md -o ~/.claude/rules/writing-style.md
+curl -fsSL https://raw.githubusercontent.com/mischasigtermans/dotclaude/main/rules/team-workflow.md -o ~/.claude/rules/team-workflow.md
 ```
 
 Same pattern for any other rule. For a skill, swap `rules` for `skills` in both the URL and the target path, and create the skill directory first:
@@ -62,6 +64,8 @@ Same pattern for any other rule. For a skill, swap `rules` for `skills` in both 
 ```bash
 mkdir -p ~/.claude/skills/laravel-forge-cli && curl -fsSL https://raw.githubusercontent.com/mischasigtermans/dotclaude/main/skills/laravel-forge-cli/SKILL.md -o ~/.claude/skills/laravel-forge-cli/SKILL.md
 ```
+
+Multi-file skills like `docs` don't fit a one-liner. Clone the repo and copy the directory: `git clone https://github.com/mischasigtermans/dotclaude /tmp/dc && cp -r /tmp/dc/skills/docs ~/.claude/skills/`.
 
 ## External dependencies
 
@@ -91,5 +95,9 @@ If you want to add a new file or directory, edit `.gitignore` to whitelist it ex
 
 ## Credits
 
-Several coding rules in CLAUDE.md (Surgical changes, Simplicity, Success criteria) are downstream of [Andrej Karpathy's notes on LLM coding](https://x.com/karpathy/status/2015883857489522876), distilled via [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills/tree/main). 
+Several coding rules in CLAUDE.md (Surgical changes, Simplicity, Success criteria) are downstream of [Andrej Karpathy's notes on LLM coding](https://x.com/karpathy/status/2015883857489522876), distilled via [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills/tree/main).
+
+## License
+
+MIT. See [LICENSE](LICENSE).
 
