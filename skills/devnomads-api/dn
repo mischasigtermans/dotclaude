@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# dn: thin client for the DevNomads infrastructure API (https://api.devnomads.nl)
+# Token resolution, in order:
+#   1. DEVNOMADS_API_TOKEN env var
+#   2. DEVNOMADS_PROFILE set  -> ~/.config/devnomads/<profile>.token  (one per project/key)
+#   3. ~/.config/devnomads/token  (default)
+set -euo pipefail
+
+BASE="${DEVNOMADS_API_BASE:-https://api.devnomads.nl}"
+
+token() {
+  if [ -n "${DEVNOMADS_API_TOKEN:-}" ]; then printf '%s' "$DEVNOMADS_API_TOKEN"; return; fi
+  local dir="$HOME/.config/devnomads" prof="${DEVNOMADS_PROFILE:-}"
+  if [ -n "$prof" ] && [ -f "$dir/$prof.token" ]; then tr -d '[:space:]' < "$dir/$prof.token"; return; fi
+  if [ -f "$dir/token" ]; then tr -d '[:space:]' < "$dir/token"; return; fi
+  echo "dn: no token. Set DEVNOMADS_API_TOKEN, or DEVNOMADS_PROFILE (~/.config/devnomads/<profile>.token), or ~/.config/devnomads/token" >&2
+  exit 1
+}
+
+pretty() { if command -v jq >/dev/null 2>&1; then jq .; else cat; fi; }
+
+# req METHOD PATH [json-body]
+req() {
+  local method="$1" path="$2" body="${3:-}"
+  local url="$BASE${path}"
+  local args=(-sS -X "$method" -H "Authorization: Bearer $(token)" -H "Accept: application/json")
+  if [ -n "$body" ]; then args+=(-H "Content-Type: application/json" -d "$body"); fi
+  curl "${args[@]}" "$url"
+}
+
+# GET helper that pretty-prints
+get() { req GET "$1" | pretty; }
+
+confirm() {
+  printf 'dn: %s [y/N] ' "$1" >&2
+  read -r ans </dev/tty || { echo "dn: no tty for confirmation; aborting" >&2; exit 1; }
+  case "$ans" in y|Y|yes) ;; *) echo "dn: aborted" >&2; exit 1;; esac
+}
+
+cmd="${1:-help}"; shift || true
+
+case "$cmd" in
+  # ---- raw passthrough ----
+  get)        get "$1" ;;
+  raw)        req "$1" "$2" "${3:-}" | pretty ;;   # dn raw POST /path '{"k":"v"}'
+
+  # ---- inventory ----
+  services)   get /services ;;
+  servers)    get /services/servers ;;
+  server)     get "/services/servers/$1" ;;
+  sites)      get /services/sites ;;
+  site)       get "/services/sites/$1" ;;
+  databases)  get /services/databases ;;
+  database)   get "/services/databases/$1" ;;
+  clusters)   get /services/databases/clusters ;;
+  cluster)    get "/services/databases/clusters/$1" ;;
+  domains)    get /services/domains ;;
+  proxies)    get /services/proxies ;;
+  proxy)      get "/services/proxies/$1" ;;
+  containers) get /services/containers ;;
+  emails)     get /services/emails ;;
+
+  # ---- dns ----
+  zones)      get /services/dns/zones ;;
+  zone)       get "/services/dns/zones/$1" ;;
+
+  # ---- container deploy / logs / state ----
+  deploy)     confirm "deploy container service $1?"; get "/services/containers/$1/deploy" ;;
+  logs)       get "/services/containers/$1/instances/$2/logs" ;;
+
+  # ---- server power state (guarded) ----
+  # dn server:state <id> <reboot|stop|start>
+  server:state)
+    confirm "send state '$2' to server service $1?"
+    get "/services/servers/$1/state/$2" ;;
+
+  # ---- proxy up/down (guarded) ----
+  proxy:up)   confirm "bring proxy $1 UP?";   get "/services/proxies/$1/up" ;;
+  proxy:down) confirm "bring proxy $1 DOWN (cuts traffic)?"; get "/services/proxies/$1/down" ;;
+
+  help|*)
+    cat >&2 <<'EOF'
+dn: DevNomads API client
+
+Inventory (read-only):
+  dn services                 all services overview
+  dn servers | server <id>    list / show servers
+  dn sites    | site <id>     list / show sites
+  dn databases| database <id> list / show databases
+  dn clusters | cluster <id>  list / show db clusters
+  dn domains                  domain services
+  dn proxies  | proxy <id>    list / show proxies
+  dn containers | emails      list services
+  dn zones    | zone <name>   DNS zones (zone name needs trailing dot, e.g. example.com.)
+
+Actions (guarded, prompt y/N):
+  dn deploy <containerServiceId>
+  dn server:state <serverServiceId> <reboot|stop|start>
+  dn proxy:up <id> | dn proxy:down <id>
+  dn logs <containerServiceId> <instanceId>
+
+Escape hatch (any endpoint from the OpenAPI spec):
+  dn get  /services/sites/<id>
+  dn raw  PATCH /services/dns/zones/example.com. '{"rrsets":[...]}'
+
+Token: DEVNOMADS_API_TOKEN env, or DEVNOMADS_PROFILE=<name> with
+       ~/.config/devnomads/<name>.token, or ~/.config/devnomads/token
+Spec:  curl 'https://api.devnomads.nl/docs?api-docs.json'
+EOF
+    ;;
+esac

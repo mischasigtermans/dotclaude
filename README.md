@@ -25,17 +25,22 @@ The split keeps the always-on context lean. Rules pay the token cost every sessi
 ├── hooks/
 │   └── rtk-rewrite.sh      # Token-saving Bash hook
 ├── rules/
+│   ├── bear.md             # How I format and tag notes in Bear
 │   ├── projects.md         # Where my projects live
 │   ├── rtk.md              # rtk hook usage
 │   └── team-workflow.md    # When to use agent teams
 └── skills/
     ├── counselors/         # External, see below
+    ├── devnomads-api/      # Operate DevNomads infrastructure via the dn client
     ├── docs/               # House style for READMEs, CHANGELOGs, and repo boilerplate
     ├── laravel-forge-cli/  # Operate Forge servers and sites via the forge CLI
+    ├── solo/               # Operate the Solo terminal harness via its MCP server
     └── ui/                 # External, see below
 ```
 
 ## My rules
+
+- **[`rules/bear.md`](rules/bear.md)**: how I format and tag notes in [Bear](https://bear.app). Tag placement, the tag taxonomy (ventures, ideas, personal, meetings, tooling, reading), when to migrate a note verbatim vs rewrite it, and how to escape inline hashtags so they don't pollute the tag tree. Always-on because note edits happen mid-task, not in a dedicated session. The taxonomy examples are genericised here; the live venture set is discovered at runtime via `bearcli tags`.
 
 - **[`rules/projects.md`](rules/projects.md)**: where my projects live (`~/Github`, `~/Github/mischasigtermans`, `~/Sites`). So Claude checks those paths first when I name a project.
 
@@ -51,6 +56,10 @@ Voice rules used to live in `rules/writing-style.md`. They've been folded into [
 
 - **[`skills/laravel-forge-cli/`](skills/laravel-forge-cli/SKILL.md)**: how to operate Laravel Forge servers via the `forge` CLI. Triggers on deploy, prod logs, env pull/push, restart-php-fpm, and similar ops verbs. Saves me from re-explaining the CLI shape every time and keeps Claude from improvising with `curl` for things the CLI does cleanly.
 
+- **[`skills/devnomads-api/`](skills/devnomads-api/SKILL.md)**: how to operate DevNomads (infrapod.nl) infrastructure via its HTTP API. Ships a small `dn` bash client that wraps the raw endpoints with bearer auth and a y/N prompt on anything that moves traffic or power. Triggers on reboots, proxy repoints, DNS zone edits, and container deploys. This is the infra layer below the app, where forge and SSH take over. Account-specific IDs and tokens live outside the repo so the skill stays publishable.
+
+- **[`skills/solo/`](skills/solo/SKILL.md)**: how to operate [Solo](https://soloterm.com), my terminal harness, via its MCP server. Covers long-running processes (dev servers, watchers, log tails), cross-session scratchpads and todos, lead-plus-worker orchestration with cross-lab agents, and coordination primitives (locks, timers, KV). My default for parallel work over Claude Code teams, since Solo persists and shows up in the IDE.
+
 ## Borrow one
 
 Single-file rules and skills drop in with a one-liner. Example for `team-workflow`:
@@ -65,7 +74,7 @@ Same pattern for any other rule. For a skill, swap `rules` for `skills` in both 
 mkdir -p ~/.claude/skills/laravel-forge-cli && curl -fsSL https://raw.githubusercontent.com/mischasigtermans/dotclaude/main/skills/laravel-forge-cli/SKILL.md -o ~/.claude/skills/laravel-forge-cli/SKILL.md
 ```
 
-Multi-file skills like `docs` don't fit a one-liner. Clone the repo and copy the directory: `git clone https://github.com/mischasigtermans/dotclaude /tmp/dc && cp -r /tmp/dc/skills/docs ~/.claude/skills/`.
+Multi-file skills like `docs` and `devnomads-api` (which ships its own `dn` client) don't fit a one-liner. Clone the repo and copy the directory: `git clone https://github.com/mischasigtermans/dotclaude /tmp/dc && cp -r /tmp/dc/skills/docs ~/.claude/skills/`.
 
 ## External dependencies
 

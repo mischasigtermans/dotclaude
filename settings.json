@@ -36,13 +36,20 @@
   "enabledPlugins": {
     "codex@openai-codex": true,
     "frontend-design@claude-plugins-official": true,
-    "ralph@rydeventures-claude-plugins": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "swift-lsp@claude-plugins-official": true,
     "telegram@claude-plugins-official": true,
-    "parley@rydeventures-claude-plugins": true,
-    "personas@rydeventures-claude-plugins": true,
-    "code-simplifier@claude-plugins-official": true
+    "code-simplifier@claude-plugins-official": true,
+    "library@by-mischa": true,
+    "parley@by-mischa": true,
+    "personas@by-mischa": true,
+    "steve-jobs@by-mischa": true,
+    "raymond-hettinger@by-mischa": true,
+    "taylor-otwell@by-mischa": true,
+    "david-tolnay@by-mischa": true,
+    "ralph@by-mischa": true,
+    "security-guidance@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "helpscout-mcp": {
@@ -55,6 +62,24 @@
       "source": {
         "source": "github",
         "repo": "openai/codex-plugin-cc"
+      }
+    },
+    "by-mischa": {
+      "source": {
+        "source": "github",
+        "repo": "mischasigtermans/by-mischa"
+      }
+    },
+    "expo-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "expo/skills"
+      }
+    },
+    "capgo-skills": {
+      "source": {
+        "source": "github",
+        "repo": "cap-go/capgo-skills"
       }
     }
   },
