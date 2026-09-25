@@ -4,16 +4,18 @@
     "command": "echo"
   },
   "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_NO_FLICKER": "1",
     "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet"
   },
-  "includeCoAuthoredBy": false,
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
   "permissions": {
     "allow": [],
-    "defaultMode": "bypassPermissions"
+    "defaultMode": "auto"
   },
   "hooks": {
     "PreToolUse": [
@@ -25,8 +27,67 @@
             "command": "bash ~/.claude/hooks/rtk-rewrite.sh"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/bash-guard.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/config-protect.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/ui-gate.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/memory-gate.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/php-format.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/dash-lint.py"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/php-format.py",
+            "timeout": 240
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/sharpen-gate.py"
+          }
+        ]
       }
     ]
+  },
+  "worktree": {
+    "baseRef": "fresh"
   },
   "statusLine": {
     "type": "command",
@@ -35,13 +96,9 @@
   },
   "enabledPlugins": {
     "codex@openai-codex": true,
-    "frontend-design@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": false,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "swift-lsp@claude-plugins-official": true,
-    "telegram@claude-plugins-official": true,
-    "code-simplifier@claude-plugins-official": true,
-    "library@by-mischa": true,
-    "parley@by-mischa": true,
     "personas@by-mischa": true,
     "steve-jobs@by-mischa": true,
     "raymond-hettinger@by-mischa": true,
@@ -49,15 +106,20 @@
     "david-tolnay@by-mischa": true,
     "ralph@by-mischa": true,
     "security-guidance@claude-plugins-official": true,
-    "claude-md-management@claude-plugins-official": true
+    "claude-md-management@claude-plugins-official": true,
+    "cloudflare@cloudflare": true,
+    "stripe@claude-plugins-official": false,
+    "claude-security@claude-plugins-official": true,
+    "library@by-mischa": true,
+    "shopify-ai-toolkit@claude-plugins-official": false,
+    "turbopuffer@turbopuffer-skills": false,
+    "firecrawl@claude-plugins-official": true,
+    "laravel-cloud@laravel": true,
+    "laravel@laravel": true,
+    "laravel-lsp@laravel": true,
+    "parley@by-mischa": true
   },
   "extraKnownMarketplaces": {
-    "helpscout-mcp": {
-      "source": {
-        "source": "github",
-        "repo": "drewburchfield/help-scout-mcp-server"
-      }
-    },
     "openai-codex": {
       "source": {
         "source": "github",
@@ -68,26 +130,47 @@
       "source": {
         "source": "github",
         "repo": "mischasigtermans/by-mischa"
-      }
+      },
+      "autoUpdate": true
     },
-    "expo-plugins": {
+    "cloudflare": {
       "source": {
         "source": "github",
-        "repo": "expo/skills"
+        "repo": "cloudflare/skills"
       }
     },
-    "capgo-skills": {
+    "local": {
+      "source": {
+        "source": "directory",
+        "path": "/Users/Mischa/Github/mischasigtermans"
+      }
+    },
+    "turbopuffer-skills": {
       "source": {
         "source": "github",
-        "repo": "cap-go/capgo-skills"
+        "repo": "turbopuffer/skills"
+      }
+    },
+    "laravel": {
+      "source": {
+        "source": "github",
+        "repo": "laravel/agent-skills"
       }
     }
   },
   "effortLevel": "high",
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  },
   "autoUpdatesChannel": "latest",
   "autoDreamEnabled": true,
   "skipDangerousModePermissionPrompt": true,
   "theme": "light",
   "verbose": true,
-  "teammateMode": "in-process"
+  "switchModelsOnFlag": false,
+  "teammateMode": "in-process",
+  "inputNeededNotifEnabled": false,
+  "agentPushNotifEnabled": true
 }

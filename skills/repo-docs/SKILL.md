@@ -1,6 +1,6 @@
 ---
-name: docs
-description: Activate when writing, reviewing, or restructuring documentation in any of Mischa's repos. Covers READMEs, CHANGELOGs, .github files, commit messages, versioning, and ecosystem-specific conventions for Claude Code plugins, Laravel packages, and apps. Use when the user asks to write or update a README, draft a CHANGELOG entry, tag a release, set up repo boilerplate, or align a repo with the house style.
+name: repo-docs
+description: "Activate when writing, reviewing, or restructuring documentation in any of Mischa's repos. Covers READMEs, CHANGELOGs, .github files, commit messages, versioning, and ecosystem-specific conventions for Claude Code plugins, Laravel packages, and apps. Triggers on 'write a README', 'update the readme', 'draft a changelog entry', 'write a commit message', 'tag a release', 'set up repo boilerplate', 'align this repo with the house style'."
 ---
 
 # Documentation Standard

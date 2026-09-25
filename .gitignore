@@ -25,9 +25,15 @@
 !rules/
 !rules/**
 
+# Rules naming private projects, loaded locally only
+rules/private.md
+
 # Allow skills (recursively)
 !skills/
 !skills/**
+
+# claude.ai-synced skills (Anthropic, proprietary licenses)
+skills/synced/
 
 # Allow hooks (recursively)
 !hooks/
@@ -36,3 +42,6 @@
 # rtk auto-regenerates this checksum on first run; no value committing it
 hooks/.rtk-hook.sha256
 parley-session
+
+# Python bytecode from running the hooks
+hooks/__pycache__/

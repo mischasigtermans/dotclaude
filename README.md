@@ -4,109 +4,98 @@ My personal Claude Code setup. Public for two reasons: I want to redeploy it on 
 
 This isn't a template to clone wholesale. The voice rules, project paths, and bio reference me specifically. Read the parts that interest you, copy patterns into your own setup.
 
-## Philosophy
-
-Three layers, three roles.
-
-- **CLAUDE.md**: the agent. How it talks, how it codes. Always on.
-- **rules/**: always-on add-ons. Auto-load every session. Use for context that should always be present (project paths, tools, coordination patterns).
-- **skills/**: trigger on intent. Load only when matched against the user's message. Use for behavior that activates for specific tasks (writing copy, deploying, reviewing).
-
-The split keeps the always-on context lean. Rules pay the token cost every session, skills only when invoked. Anything the agent should know all the time goes in rules. Anything that only matters for a class of task goes in skills.
-
 ## Layout
 
-```
-.
-├── CLAUDE.md               # Communication, coding discipline, hard rules
-├── settings.json           # Env vars, hook config, status line, plugin enablement
-├── statusline-wrapper.sh   # Status line composition
-├── statusline-command.sh   # Git info for the status line
-├── hooks/
-│   └── rtk-rewrite.sh      # Token-saving Bash hook
-├── rules/
-│   ├── bear.md             # How I format and tag notes in Bear
-│   ├── projects.md         # Where my projects live
-│   ├── rtk.md              # rtk hook usage
-│   └── team-workflow.md    # When to use agent teams
-└── skills/
-    ├── counselors/         # External, see below
-    ├── devnomads-api/      # Operate DevNomads infrastructure via the dn client
-    ├── docs/               # House style for READMEs, CHANGELOGs, and repo boilerplate
-    ├── laravel-forge-cli/  # Operate Forge servers and sites via the forge CLI
-    ├── solo/               # Operate the Solo terminal harness via its MCP server
-    └── ui/                 # External, see below
-```
+- **CLAUDE.md**: the agent. How it talks, how it codes. Always on.
+- **rules/**: context that loads on its own. Most load every session; `ui.md` and `laravel.md` carry `paths:` frontmatter and load only when Claude reads a matching file.
+- **skills/**: behaviour for a class of task, loaded when the ask matches or when I type the slash command.
+- **hooks/**: what prose can't enforce. My most frequent corrections were things CLAUDE.md already said, so the recurring ones are hooks.
 
-## My rules
+Rules pay their token cost every session, skills only when invoked, hooks never.
 
-- **[`rules/bear.md`](rules/bear.md)**: how I format and tag notes in [Bear](https://bear.app). Tag placement, the tag taxonomy (ventures, ideas, personal, meetings, tooling, reading), when to migrate a note verbatim vs rewrite it, and how to escape inline hashtags so they don't pollute the tag tree. Always-on because note edits happen mid-task, not in a dedicated session. The taxonomy examples are genericised here; the live venture set is discovered at runtime via `bearcli tags`.
+## Rules
 
-- **[`rules/projects.md`](rules/projects.md)**: where my projects live (`~/Github`, `~/Github/mischasigtermans`, `~/Sites`). So Claude checks those paths first when I name a project.
+- **[`projects.md`](rules/projects.md)**: where my projects live, so Claude checks those paths first when I name one.
+- **[`rtk.md`](rules/rtk.md)**: a hook rewrites shell commands through rtk; which output it condenses and how to bypass it.
+- **[`orchestration.md`](rules/orchestration.md)**: which harness parallel work runs through (inline, subagents, Workflow, Solo), how sessions talk to each other, and that whoever delegates collects.
+- **[`second-opinions.md`](rules/second-opinions.md)**: when to ask a persona, a peer project or a [Parley](https://github.com/mischasigtermans/claude-parley) gathering unprompted, and the gates every review question carries.
+- **[`ui.md`](rules/ui.md)**: the bar every UI change meets without being asked. Mobile-first, dark variants, Flux controls, ui.sh guidelines for anything new.
+- **[`laravel.md`](rules/laravel.md)**: Pint on the Laravel preset, never `--dirty` or `--blade`, Flux Pro activation, and what to leave unchecked at `boost:install`. Loads on any PHP file, so a new project needs no setup.
 
-- **[`rules/rtk.md`](rules/rtk.md)**: how to use the rtk tool. Reminds Claude that a hook is rewriting commands, and what to do when output looks empty or filtered.
+## Skills
 
-- **[`rules/team-workflow.md`](rules/team-workflow.md)**: when to use Claude Code's team-of-agents feature, and when not to. Always-on because the decision happens upfront before any work starts. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (already set in this repo's `settings.json`).
+| Skill | What it does |
+| --- | --- |
+| [`ui`](skills/ui/SKILL.md) | Builds and refines UI with the ui.sh guidelines, fetched live: new UI, variants, responsive, dark mode, components, Tailwind cleanup, craft |
+| [`motion`](skills/motion/SKILL.md) | Anything that moves: name it, find it, review it, plan it |
+| [`sharpen`](skills/sharpen/SKILL.md) | Diagnoses AI-slop in a draft, rewrites on my word; self-checks Claude's own copy |
+| [`repo-docs`](skills/repo-docs/SKILL.md) | House style for READMEs, CHANGELOGs, commits, versioning and repo boilerplate |
+| [`finish`](skills/finish/SKILL.md) | The round a change makes before it's committed: simplify, review, format, test, look |
+| [`handoff`](skills/handoff/SKILL.md) | Hands a full session to a fresh one through a Solo scratchpad |
+| [`solo`](skills/solo/SKILL.md) | Operates [Solo](https://soloterm.com), my terminal harness, via its MCP server |
+| [`team-update`](skills/team-update/SKILL.md) | A 'Shipped' update from what actually landed |
+| [`laravel-forge`](skills/laravel-forge/SKILL.md) | Operates Forge servers and sites via the `forge` CLI |
+| [`cloud-database`](skills/cloud-database/SKILL.md) | Copies a Laravel Cloud database between environments without the two traps |
+| [`devnomads`](skills/devnomads/SKILL.md) | Operates DevNomads infrastructure via `dncli` |
+| [`bear`](skills/bear/SKILL.md) | How I format and tag notes in Bear |
+| [`mail`](skills/mail/SKILL.md) | Composing Apple Mail drafts without mojibake |
 
-Voice rules used to live in `rules/writing-style.md`. They've been folded into [`CLAUDE.md`](CLAUDE.md) under 'How you write', since writing happens incidentally inside other tasks (drafting a README mid-build, naming a function, writing a commit message) and the agent definition is the right place for an always-on style.
+The ui skill holds no ui.sh content. It fetches it from the ui.sh MCP server at run time, so it needs a ui.sh licence and its MCP server to work.
 
-## My skills
+## Hooks
 
-- **[`skills/docs/`](skills/docs/SKILL.md)**: how my repos document themselves. Triggers on writing or restructuring READMEs, CHANGELOGs, `.github/` files, commit messages, or release tagging. Detects the ecosystem from the repo (Claude Code plugin, Laravel package, app) and loads the matching conventions. The skill is the source of truth; individual repos catch up to it, not the other way around.
+| Hook | Event | What it does |
+| --- | --- | --- |
+| [`rtk-rewrite.sh`](hooks/rtk-rewrite.sh) | PreToolUse Bash | Rewrites commands through rtk for smaller output |
+| [`bash-guard.py`](hooks/bash-guard.py) | PreToolUse Bash | Denies `git add -A`/`.`, `commit -a`, commit trailers, `--no-verify`, tag creation, `pint --dirty` |
+| [`config-protect.py`](hooks/config-protect.py) | PreToolUse Edit/Write | Denies edits to Pint, PHPStan, Prettier and ESLint config: fix the code, not the linter |
+| [`ui-gate.py`](hooks/ui-gate.py) | PreToolUse Edit/Write | Sends `rules/ui.md` with the first UI edit when no UI file was read (the path rule didn't load) |
+| [`memory-gate.py`](hooks/memory-gate.py) | PreToolUse Edit/Write | Denies feedback memories (a rule belongs in CLAUDE.md, `rules/` or the repo guideline) and status in project memories |
+| [`php-format.py`](hooks/php-format.py) | PostToolUse, Stop | Notes edited PHP files (never Blade); at Stop runs Pint on them and PHPStan, blocks on errors |
+| [`dash-lint.py`](hooks/dash-lint.py) | PostToolUse Edit/Write | Flags em dashes, en dashes and middle dots in copy |
+| [`sharpen-gate.py`](hooks/sharpen-gate.py) | Stop | After 150+ words of prose in files or drafts, sends Claude through `sharpen` before it stops |
 
-- **[`skills/laravel-forge-cli/`](skills/laravel-forge-cli/SKILL.md)**: how to operate Laravel Forge servers via the `forge` CLI. Triggers on deploy, prod logs, env pull/push, restart-php-fpm, and similar ops verbs. Saves me from re-explaining the CLI shape every time and keeps Claude from improvising with `curl` for things the CLI does cleanly.
+`bash hooks/tests/run.sh` pipes fake payloads through every hook and asserts on the output. All hooks fail open: an internal error never blocks a tool call.
 
-- **[`skills/devnomads-api/`](skills/devnomads-api/SKILL.md)**: how to operate DevNomads (infrapod.nl) infrastructure via its HTTP API. Ships a small `dn` bash client that wraps the raw endpoints with bearer auth and a y/N prompt on anything that moves traffic or power. Triggers on reboots, proxy repoints, DNS zone edits, and container deploys. This is the infra layer below the app, where forge and SSH take over. Account-specific IDs and tokens live outside the repo so the skill stays publishable.
+## Plugins and MCP servers
 
-- **[`skills/solo/`](skills/solo/SKILL.md)**: how to operate [Solo](https://soloterm.com), my terminal harness, via its MCP server. Covers long-running processes (dev servers, watchers, log tails), cross-session scratchpads and todos, lead-plus-worker orchestration with cross-lab agents, and coordination primitives (locks, timers, KV). My default for parallel work over Claude Code teams, since Solo persists and shows up in the IDE.
+`settings.json` enables the plugins; they install from their own marketplaces. Four I built: [Personas](https://github.com/mischasigtermans/claude-personas) (advisors like Taylor Otwell and Steve Jobs), [Parley](https://github.com/mischasigtermans/claude-parley) (projects and personas consult each other, alone or in a gathering), [Library](https://github.com/mischasigtermans/claude-library) (search my past Claude chats and sessions) and [Ralph](https://github.com/mischasigtermans/claude-ralph) (an autonomous build loop). From others: Laravel's [agent-skills](https://github.com/laravel/agent-skills) (`laravel`, `laravel-cloud`), Firecrawl as the web layer, Codex, Cloudflare, Claude Security and language servers.
+
+MCP servers live in `~/.claude.json`, outside this repo.
 
 ## Borrow one
 
-Single-file rules and skills drop in with a one-liner. Example for `team-workflow`:
+Single-file rules and skills drop in with a one-liner:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/mischasigtermans/dotclaude/main/rules/team-workflow.md -o ~/.claude/rules/team-workflow.md
+curl -fsSL https://raw.githubusercontent.com/mischasigtermans/dotclaude/main/rules/orchestration.md -o ~/.claude/rules/orchestration.md
 ```
 
-Same pattern for any other rule. For a skill, swap `rules` for `skills` in both the URL and the target path, and create the skill directory first:
+Multi-file skills and the hooks need the directory: `git clone https://github.com/mischasigtermans/dotclaude /tmp/dc && cp -r /tmp/dc/skills/motion ~/.claude/skills/`. Hooks also need their entry in `settings.json`.
 
-```bash
-mkdir -p ~/.claude/skills/laravel-forge-cli && curl -fsSL https://raw.githubusercontent.com/mischasigtermans/dotclaude/main/skills/laravel-forge-cli/SKILL.md -o ~/.claude/skills/laravel-forge-cli/SKILL.md
-```
+## What stays out
 
-Multi-file skills like `docs` and `devnomads-api` (which ships its own `dn` client) don't fit a one-liner. Clone the repo and copy the directory: `git clone https://github.com/mischasigtermans/dotclaude /tmp/dc && cp -r /tmp/dc/skills/docs ~/.claude/skills/`.
-
-## External dependencies
-
-Some skills and rules in this repo reference external tools. Install them separately if you want those capabilities.
-
-- **rtk**: token-saving CLI proxy for shell command output. Referenced by `rules/rtk.md`. [rtk-ai/rtk](https://github.com/rtk-ai/rtk).
-- **counselors**: multi-agent code review via parallel AI agents, by [Aaron Francis](https://x.com/aarondfrancis). Referenced by `skills/counselors/`. [aarondfrancis/counselors](https://github.com/aarondfrancis/counselors).
-- **ui.sh**: paid UI exploration skill, managed remotely, by [Adam Wathan](https://x.com/adamwathan) and [Steve Schoger](https://x.com/steveschoger). Referenced by `skills/ui/`. [ui.sh](https://ui.sh).
-
-Without these tools installed, the related skill or rule has no effect. Nothing else breaks.
-
-## What is NOT in this repo
-
-By design, this repo uses a `.gitignore` whitelist. Everything not explicitly listed is ignored.
-
-That means no `settings.local.json`, no plugin caches, no memory files, no project data, no logs, no API keys, no tokens, no session history. The repo carries the parts that are reproducible across machines and worth sharing: agent definition, settings, hooks, status line, rules, and skills. Nothing more.
-
-The plugins enabled in `settings.json` install separately from their own repositories or marketplaces. The settings file flips them on, but you need them installed for the toggles to do anything. Three I built and wrote about: [Personas](https://mischa.sigtermans.me/thought/taylor-is-still-immortal-but-now-he-remembers), [Parley](https://mischa.sigtermans.me/thought/how-i-made-my-claude-code-projects-call-each-other), [Ralph](https://mischa.sigtermans.me/thought/my-simplified-ralph-loop-setup-for-claude-code). Plus language servers.
-
-If you want to add a new file or directory, edit `.gitignore` to whitelist it explicitly. Do not disable the whitelist.
+The `.gitignore` is a whitelist: anything not listed stays out. No `settings.local.json`, plugin caches, memory, project data, logs, tokens or session history, and no claude.ai-synced skills. To add a file, whitelist it explicitly.
 
 ## Further reading
 
-- [My Claude Code settings](https://mischa.sigtermans.me/thought/my-claude-code-settings): the broader picture, env vars, and philosophy.
-- [How I saved billions of tokens with a Claude Code hook](https://mischa.sigtermans.me/thought/how-i-saved-billions-of-tokens-with-a-claude-code-hook): why rtk, and how the hook works.
-- [How I set up my Claude Code status line](https://mischa.sigtermans.me/thought/how-i-set-up-my-claude-code-status-line): the reasoning behind the statusline scripts.
+- [My Claude Code settings](https://mischa.sigtermans.me/thought/my-claude-code-settings)
+- [How I saved billions of tokens with a Claude Code hook](https://mischa.sigtermans.me/thought/how-i-saved-billions-of-tokens-with-a-claude-code-hook)
+- [How I set up my Claude Code status line](https://mischa.sigtermans.me/thought/how-i-set-up-my-claude-code-status-line)
+- [I stopped running agent teams and moved everything to Solo](https://mischa.sigtermans.me/thought/i-stopped-running-agent-teams-and-moved-to-solo)
+- [How I made my Claude Code projects call each other](https://mischa.sigtermans.me/thought/how-i-made-my-claude-code-projects-call-each-other)
+- [Taylor is still immortal, but now he remembers](https://mischa.sigtermans.me/thought/taylor-is-still-immortal-but-now-he-remembers)
+- [My simplified Ralph loop setup for Claude Code](https://mischa.sigtermans.me/thought/my-simplified-ralph-loop-setup-for-claude-code)
 
 ## Credits
 
-Several coding rules in CLAUDE.md (Surgical changes, Simplicity, Success criteria) are downstream of [Andrej Karpathy's notes on LLM coding](https://x.com/karpathy/status/2015883857489522876), distilled via [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills/tree/main).
+- Surgical changes, Simplicity and Success criteria in CLAUDE.md come from [Andrej Karpathy's notes on LLM coding](https://x.com/karpathy/status/2015883857489522876), via [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills).
+- The ui skill runs on [ui.sh](https://ui.sh) by [Adam Wathan](https://x.com/adamwathan) and [Steve Schoger](https://x.com/steveschoger).
+- `motion/` and `ui/feel.md` consolidate [Emil Kowalski](https://emilkowal.ski)'s [skills](https://github.com/emilkowalski/skills) (MIT); `ui/libraries.md` is his `pick-ui-library`.
+- `ui/surfaces.md`, `ui/typography.md` and parts of `motion/standards.md` come from [Jakub Krehel](https://jakub.kr)'s [make-interfaces-feel-better](https://github.com/jakubkrehel/make-interfaces-feel-better).
+- `sharpen/` is [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop), restructured to analyse first.
+- The hook set and its tests take their shape from [affaan-m/ECC](https://github.com/affaan-m/ECC).
 
 ## License
 
 MIT. See [LICENSE](LICENSE).
-
