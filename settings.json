@@ -53,6 +53,16 @@
             "command": "python3 ~/.claude/hooks/memory-gate.py"
           }
         ]
+      },
+      {
+        "matcher": "Artifact|mcp__claude-artifacts__.*|mcp__claude_ai_Claude_Docs__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.local/bin/clauset hook guard",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -83,6 +93,29 @@
             "command": "python3 ~/.claude/hooks/sharpen-gate.py"
           }
         ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.local/bin/clauset hook context",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.local/bin/clauset hook limit",
+            "timeout": 5
+          }
+        ],
+        "matcher": "rate_limit"
       }
     ]
   },
