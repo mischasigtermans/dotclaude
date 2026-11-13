@@ -83,6 +83,10 @@
             "type": "command",
             "command": "python3 ~/.claude/hooks/php-format.py",
             "timeout": 240
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/sharpen-gate.py"
           }
         ]
       }
@@ -150,9 +154,7 @@
     "laravel-lsp@laravel": true,
     "parley@by-mischa": true,
     "cc-plugin-you-should-know@builtin": true,
-    "openseo@openseo": true,
-    "writing@local": true,
-    "development@local": true
+    "openseo@openseo": true
   },
   "extraKnownMarketplaces": {
     "openai-codex": {

@@ -1,25 +1,48 @@
 ---
 name: ui
-description: "Local licensed design-pack workflows: UI variants and the browser picker, responsive layouts, dark-mode conversion and Tailwind canonicalization. Load when rules/ui.md requests the design guidelines, or when the user asks for the pack or its workflows. General UI review, component extraction and craft belong to development:ui; animation to development:motion."
-allowed-tools:
-  - Bash(npx @tailwindcss/cli:*)
+description: "Build and refine UI against a craft bar. Use for: new pages, sections and components; add or fix dark mode; componentize or extract components (optimaliseer componenten); improve the UI or review the frontend (verbeter de UI); picking a component, chart or animation library; and craft: shadows, radius, optical alignment, hit areas, typography, hover states, 'this feels off', 'why does this look cheap'. Anything that moves belongs to motion."
 ---
 
 # UI
 
-A licensed design pack, kept local and never published: the routing, the subskills, the design guidelines and the picker script are files in this directory.
+The user's own UI rules set the bar. This skill adds the craft under it: how to get surfaces, type and feel right, which library to reach for, and how to work on an interface without breaking it.
 
-## Load first
+## Load
 
-1. Read [routing.md](./routing.md) and follow it: design (the fallback), ideas, finalize, componentize, canonicalize-tailwind, add-dark-mode, dark-mode-image, make-responsive. Read the matched subskill and every guideline it points to before writing code. Its line that it only runs on an explicit `/ui` doesn't apply here.
-2. New UI reads [design-guidelines.md](./design-guidelines.md) for the index, then every topic that applies: always `responsive-design`, plus the section's own topic such as `testimonials` or `pricing-cards`. The index alone holds no rules.
-3. Load `development:ui` as well. Its craft files cover surfaces, typography, feel and library picks, and its sections on how to work, review and verify apply to everything built here. Where a guideline here and a craft file there disagree (shadows, heading leading, the font), the craft file wins.
+| For | Read |
+| --- | --- |
+| Radius, shadows, optical alignment, hit areas, image outlines | [surfaces.md](./surfaces.md) |
+| Wrapping, font smoothing, tabular numbers, tracking, leading | [typography.md](./typography.md) |
+| 'Feels off', a general craft review | [feel.md](./feel.md) |
+| A component library, chart, animation, state or styling dependency | [libraries.md](./libraries.md) |
 
-## On top of the pack
+A full pass on a page is feel.md, surfaces.md and typography.md.
 
-- **A request that conflicts with a guideline**: flag it once, with what the guideline recommends and why, then build what was asked. Never override silently in either direction.
-- **Ideas:** the pack's `question` tool is AskUserQuestion here. The picker script is [ui-picker.js](./ui-picker.js) in this directory: copy it into the project's public directory and load it as `/ui-picker.js`. At final cleanup the copy goes with the script tag. In a Laravel project without `resources/views/layouts/app.blade.php`, inject the script once in the shared layout the app does use (a Flux layout, for example), right before `</body>`.
-- **Dark-mode images:** the pack hands raster work to an `imagegen` skill that isn't installed here. Generating a dark variant needs an image tool in the session; without one, stop and say so. Never fake it with CSS filters.
-- **Componentize and finalize:** reuse the project's components (Flux, Blade components, the existing `components/` directory) before creating one. Scope is the files named or the feature just built, never the whole app, and the UI renders the same before and after.
-- **Canonicalize:** pass `--css <entry>` when the project's Tailwind entry isn't the default, and run it over every class list you touched, including new components.
-- **Placeholder images:** `placeholder-content.md` and `assets-api.md` load images from the pack's own asset server. If that server stops answering, use the project's own images or a neutral placeholder, and say so.
+## Per kind of work
+
+- **Centering nav links or a logo on the page**, not between the side items: three flex sections. Left `flex flex-1 items-center`, the centred group at its natural width, right `flex flex-1 items-center justify-end`. The matching `flex-1` gutters put the group on the true page centre.
+- **A request that conflicts with a rule in these files**: flag it once, with what the file recommends and why, then build what was asked. Never override silently in either direction.
+- **Dark-mode images:** a dark variant of a raster image needs an image tool in the session; without one, stop and say so. Never fake it with CSS filters.
+- **Componentize:** reuse the project's components (Flux, Blade components, the existing `components/` directory) before creating one. Scope is the files named or the feature just built, never the whole app, and the UI renders the same before and after.
+
+## How to work
+
+1. Read the surrounding code first. Match the project's tokens, spacing scale, component patterns and naming. Never introduce a parallel vocabulary.
+2. Change only what the ask covers. Handle an unrelated bug the way the user's own instructions say; without any, name it in the report and leave it. Something that works but looks wrong is named and left.
+3. Say what changed and why. A diff of magic numbers with no reasoning is not a refinement.
+
+## Reviewing rather than fixing
+
+When asked to review instead of change, report in a table, one row per issue:
+
+| Before | After | Why |
+| --- | --- | --- |
+
+Say plainly when something is weak and when it's already fine. Don't manufacture findings.
+
+## Verify
+
+- The project's formatter, lint, typecheck or tests pass.
+- The change holds in both colour schemes, at every breakpoint and in every interaction state it touches.
+- Refining and componentizing never alter what the UI does.
+- Name the page, breakpoint and state to look at, and what should be visible there.

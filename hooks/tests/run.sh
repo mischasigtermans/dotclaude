@@ -94,11 +94,14 @@ check "dot: formula in code"     "$D" "$(file_payload /p/README.md 'The formula 
 check "dot: outside code"        "$D" "$(file_payload /p/README.md 'The formula `v²` holds · always.')" '"block"'
 check "dot: blade separator"     "$D" "$(file_payload /p/resources/views/a.blade.php $'<span>·</span>')" silent
 
-# Transcripts: one prompt, then the assistant tool calls given as JSON lines.
+# Transcripts: one prompt, then each argument: a tool call, or a line starting with {"type":"user" that goes in whole.
 transcript() {
   printf '%s\n' '{"type":"user","message":{"content":"do it"}}' > "$TMP/t.jsonl"
   for call in "$@"; do
-    printf '{"type":"assistant","message":{"content":[%s]}}\n' "$call" >> "$TMP/t.jsonl"
+    case "$call" in
+      '{"type":"user"'*) printf '%s\n' "$call" >> "$TMP/t.jsonl" ;;
+      *) printf '{"type":"assistant","message":{"content":[%s]}}\n' "$call" >> "$TMP/t.jsonl" ;;
+    esac
   done
 }
 U="python3 $HOOKS/ui-gate.py"
@@ -139,6 +142,66 @@ check "mem: index"                 "$M" "$(mem_payload "$MEM/MEMORY.md" '- [a](a
 check "mem: not a memory dir"      "$M" "$(mem_payload /p/docs/a.md "$(fm feedback 'x')")" silent
 check "mem: account feedback"      "$M" "$(mem_payload "$ACCOUNT/projects/-p/memory/a.md" "$(fm feedback 'Always ask first.')" "$TMP/plain")" '"deny"'
 
+stop_payload() { jq -cn --argjson a "${1:-false}" '{session_id:"test",transcript_path:"'"$TMP"'/t.jsonl",hook_event_name:"Stop",stop_hook_active:$a}'; }
+words() { python3 -c "print(' '.join(['word']*$1))"; }
+readme() { jq -cn --arg t "$(words "$1")" '{type:"tool_use",name:"Write",input:{file_path:"/p/README.md",content:$t}}'; }
+edit() { jq -cn --arg o "$(words "$1")" --arg n "$(words "$2")" '{type:"tool_use",name:"Edit",input:{file_path:"/p/README.md",old_string:$o,new_string:$n}}'; }
+SHARPEN='{"type":"tool_use","name":"Skill","input":{"skill":"sharpen"}}'
+NEXT='{"type":"user","message":{"content":"apply it"}}'
+META='{"type":"user","isMeta":true,"message":{"content":"[Image: original 390x2600]"}}'
+
+SG="python3 $HOOKS/sharpen-gate.py"
+transcript "$(readme 200)"
+check "sharpen: long README"        "$SG" "$(stop_payload)" '"block"'
+check "sharpen: already active"     "$SG" "$(stop_payload true)" silent
+transcript "$(readme 200)" '{"type":"tool_use","name":"Skill","input":{"skill":"sharpen"}}'
+check "sharpen: ran already"        "$SG" "$(stop_payload)" silent
+transcript "$(readme 200)" '{"type":"tool_use","name":"Skill","input":{"skill":"sharpen"}}'
+check "sharpen: ran by its plain name"     "$SG" "$(stop_payload)" silent
+transcript "$(readme 200)" '{"type":"tool_use","name":"Skill","input":{"skill":"anthropic-skills:sharpen"}}'
+check "sharpen: ran via claude.ai"  "$SG" "$(stop_payload)" silent
+transcript "$(readme 60)"
+check "sharpen: short"              "$SG" "$(stop_payload)" silent
+transcript "$(jq -cn --arg t "$(words 200)" '{type:"tool_use",name:"Write",input:{file_path:"/p/skills/x/SKILL.md",content:$t}}')"
+check "sharpen: SKILL.md"           "$SG" "$(stop_payload)" silent
+ELSEWHERE="env CLAUDE_CONFIG_DIR=/home/u/.claude-accounts/work $SG"
+transcript "$(jq -cn --arg t "$(words 200)" '{type:"tool_use",name:"Write",input:{file_path:"/home/u/.claude-accounts/work/projects/-p/memory/note.md",content:$t}}')"
+check "sharpen: memory under a moved config dir" "$ELSEWHERE" "$(stop_payload)" silent
+transcript "$(readme 200)"
+check "sharpen: README with a moved config dir" "$ELSEWHERE" "$(stop_payload)" '"block"'
+transcript "$(jq -cn --arg t "$(words 200)" '{type:"tool_use",name:"mcp__macuse__mail_compose_message",input:{body:$t}}')"
+check "sharpen: mail draft"         "$SG" "$(stop_payload)" silent
+transcript "$(readme 200)" "$META"
+check "sharpen: meta entry"         "$SG" "$(stop_payload)" '"block"'
+transcript "$SHARPEN" "$NEXT" "$(readme 200)"
+check "sharpen: previous sharpen is not a blanket exemption" "$SG" "$(stop_payload)" '"block"'
+transcript "$SHARPEN" "$(readme 200)"
+check "sharpen: prose after sharpen" "$SG" "$(stop_payload)" '"block"'
+transcript "$(edit 60 62)" "$(edit 60 62)" "$(edit 60 62)"
+check "sharpen: small edits"        "$SG" "$(stop_payload)" silent
+transcript "$(edit 10 200)"
+check "sharpen: large edit"         "$SG" "$(stop_payload)" '"block"'
+
+transcript "$(jq -cn --arg o "$(words 200)" --arg n "$(python3 -c "print('replacement '*200)")" '{type:"tool_use",name:"Edit",input:{file_path:"/p/README.md",old_string:$o,new_string:$n}}')"
+check "sharpen: same length rewrite" "$SG" "$(stop_payload)" '"block"'
+transcript "$(edit 200 200)"
+check "sharpen: unchanged text" "$SG" "$(stop_payload)" silent
+
+IMAGE='{"type":"user","message":{"content":[{"type":"image","source":{"type":"base64","media_type":"image/png","data":"x"}},{"type":"text","text":"[Image #1] look at this"}]}}'
+RESULT='{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t1","content":"ok"}]}}'
+transcript "$(readme 120)" "$IMAGE" "$(readme 40)"
+check "sharpen: a prompt with an image starts a turn" "$SG" "$(stop_payload)" silent
+transcript "$(readme 100)" "$RESULT" "$(readme 100)"
+check "sharpen: a tool result does not start a turn" "$SG" "$(stop_payload)" '"block"'
+
+OLD=$(words 400)
+transcript "$(jq -cn --arg t "$OLD extra" '{type:"tool_use",id:"w1",name:"Write",input:{file_path:"/p/README.md",content:$t}}')" \
+  "$(jq -cn --arg o "$OLD" '{type:"user",message:{content:[{type:"tool_result",tool_use_id:"w1",content:"ok"}]},toolUseResult:{type:"update",filePath:"/p/README.md",originalFile:$o}}')"
+check "sharpen: a Write over an existing file counts its changed words" "$SG" "$(stop_payload)" silent
+transcript "$(jq -cn --arg t "$(words 200)" '{type:"tool_use",id:"w2",name:"Write",input:{file_path:"/p/NEW.md",content:$t}}')" \
+  "$(jq -cn '{type:"user",message:{content:[{type:"tool_result",tool_use_id:"w2",content:"ok"}]},toolUseResult:{type:"create",filePath:"/p/NEW.md",originalFile:null}}')"
+check "sharpen: a Write of a new file counts every word" "$SG" "$(stop_payload)" '"block"'
+
 S="python3 $HOOKS/scope-gate.py"
 scope_payload() { jq -cn --arg s "$1" --arg d "$2" --arg p "$3" --arg t "$4" '{session_id:$s,transcript_path:("/c/projects/"+$d+"/s.jsonl"),tool_name:"Edit",tool_input:{file_path:$p,new_string:$t}}'; }
 HOME_PROJECT=$(printf '%s' "$HOME" | sed 's/[^A-Za-z0-9]/-/g')
@@ -152,16 +215,14 @@ check "scope: handoff"             "$S" "$(scope_payload "scope-$$-c" -p-site "$
 check "scope: panel run"           "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/panels/site/run/briefs/round-1.md" x)" silent
 check "scope: memory file"         "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/projects/-p-site/memory/a.md" x)" silent
 check "scope: synced skill"        "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/skills/synced/a/SKILL.md" x)" silent
-for skill in accounts clauset rex ui; do
+for skill in accounts clauset rex; do
   check "scope: local $skill" "$S" "$(scope_payload "scope-$$-local-$skill" -p-site "$HOME/.claude/skills/$skill/SKILL.md" 'A local rule.')" silent
 done
 check "scope: exact setup filename" "$S" "$(scope_payload "scope-$$-suffix" -p-site "$HOME/.claude/CLAUDE.md.backup" x)" silent
 check "scope: tool state"          "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/clauset/config.toml" x)" silent
 check "scope: project guideline"   "$S" "$(scope_payload "scope-$$-c" -p-site /p/site/CLAUDE.md x)" silent
-PLUGIN="$HOME/Github/mischasigtermans/skills"
-check "scope: plugin skill"        "$S" "$(scope_payload "scope-$$-c" -p-site "$PLUGIN/plugins/development/skills/x/SKILL.md" 'A step.')" '"deny"'
-check "scope: plugin readme"       "$S" "$(scope_payload "scope-$$-c" -p-site "$PLUGIN/README.md" x)" silent
-check "scope: plugin repo is home" "$S" "$(scope_payload "scope-$$-b" "$HOME_PROJECT-Github-mischasigtermans-skills" "$PLUGIN/plugins/development/skills/x/SKILL.md" 'More.')" silent
+check "scope: own skill"           "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/skills/finish/SKILL.md" 'A step.')" '"deny"'
+check "scope: own skill, any file" "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/skills/ui/surfaces.md" 'A value.')" '"deny"'
 rm -f "${TMPDIR:-/tmp}"/claude-scope-gate/scope-$$-*
 
 R="bash $HOOKS/rtk-rewrite.sh"

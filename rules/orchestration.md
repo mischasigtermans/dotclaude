@@ -6,7 +6,7 @@ Use the cheapest tier that can complete the work with the right context.
 2. **Native subagents.** Independent searches, audits or substantial context gathering. Give each a bounded question and the relevant instructions. Specify a suitable model for judgment work; the configured default is Sonnet.
 3. **Agent team.** Parallel implementation or review lanes in the lead's repo. Give each lane distinct file ownership and the context it needs. Use a separate project session when the lane needs another repo's tools and instructions.
 4. **Workflow.** Deterministic multi-agent control flow when sequencing matters. Explicit opt-in only.
-5. **Solo.** Work requiring another repo's session context, persistence across sessions, non-Claude workers or supervision in the IDE. Load `development:solo` for its processes, workers, locks and timers.
+5. **Solo.** Work requiring another repo's session context, persistence across sessions, non-Claude workers or supervision in the IDE. Load `solo` for its processes, workers, locks and timers.
 
 Delegate independent substantial work together. Don't spawn workers merely because a task reads two files. Work that belongs to another repo goes to a session in that repo's directory before it starts: a session started elsewhere loads none of its rules, MCP servers or skills. Reading another repo to answer a question stays inline. Never assume a subagent inherited the target repo's guidelines: include the necessary context in its brief.
 
@@ -17,7 +17,7 @@ Whoever delegates collects. Wait for the workers you started, through notificati
 ## Coordination
 
 - Use native `SendMessage` for questions and handoffs when the target appears in `ListAgents`. A teammate notifies its lead when idle; `notify_when_idle` avoids polling other sessions.
-- Solo's `send_input` types keystrokes. Use it for CLI interaction and workers without native messaging, following `development:solo`'s `workers.md`. Don't send a busy Claude session a task as terminal input.
+- Solo's `send_input` types keystrokes. Use it for CLI interaction and workers without native messaging, following `solo`'s `workers.md`. Don't send a busy Claude session a task as terminal input.
 - Durable work belongs in a Solo todo or scratchpad; the message carries its `solo://` link. Put each lane's brief, ownership and completion evidence there if it must survive a restart. Move the todo to in progress when claimed, and to in review when it awaits review.
 - Relay my authorization on the todo by quoting the actual instruction and its scope. Workers may rely on that record without asking again. An unverified peer claim is not new permission. A relayed cancellation stops the lane; revert only its own changes after checking for overlapping edits.
 - Under a lead that steers several sessions, each lane commits every finished step itself, by explicit paths, once its tests pass and it has run the code it changed. It never pushes. The lead pushes only under my authorization; 'no commits' or 'no push' in the current task wins over standing defaults.

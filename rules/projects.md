@@ -8,4 +8,4 @@ Mischa's projects live in:
 
 When asked about a project by name, check these directories first. A new project goes where its kind lives: a Herd site in `~/Sites`, a personal tool or package in `~/Github/mischasigtermans`.
 
-Reusable skills live in `~/Github/mischasigtermans/skills`, with `development` and `writing` plugins under `plugins/`. The marketplace is `~/Github/mischasigtermans/by-mischa`.
+My skills live in `~/.claude/skills`, next to the ones a tool installs there (`accounts`, `clauset`, `rex`, `synced`). The marketplace for my plugins is `~/Github/mischasigtermans/by-mischa`.

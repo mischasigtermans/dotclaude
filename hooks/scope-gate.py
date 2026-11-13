@@ -8,16 +8,15 @@ import tempfile
 from pathlib import Path
 
 HOME = Path.home()
-PLUGIN = f'{HOME}/Github/mischasigtermans/skills'
 SETUP = re.compile(
-    re.escape(f'{HOME}/.claude/') + r'((CLAUDE\.md|README\.md|settings\.json)$|rules/|hooks/)'
-    + '|' + re.escape(f'{PLUGIN}/plugins/') + r'[^/]+/skills/'
+    re.escape(f'{HOME}/.claude/')
+    + r'((CLAUDE\.md|README\.md|settings\.json)$|rules/|hooks/|skills/(?!(?:accounts|clauset|rex|synced)/))'
 )
 # Claude Code names a session's transcript folder after the directory it started in, so it stays put after a cd.
-HOME_SESSION = re.compile(re.sub(r'[^A-Za-z0-9]', '-', str(HOME)) + r'(--claude.*|' + re.sub(r'[^A-Za-z0-9]', '-', PLUGIN[len(str(HOME)):]) + ')?')
+HOME_SESSION = re.compile(re.sub(r'[^A-Za-z0-9]', '-', str(HOME)) + r'(--claude.*)?')
 SEEN = Path(tempfile.gettempdir()) / 'claude-scope-gate'
 TEST = (
-    "~/.claude and Mischa's skills plugins hold reusable preferences and methods, not one project's decisions. "
+    "~/.claude and its skills hold reusable preferences and methods, not one project's decisions. "
     'Check the text you are adding:\n'
     '- General preferences apply in every project. Tool and framework guidance applies wherever that tool is used.\n'
     '- A product decision, client detail or project-specific correction belongs in that project or its shared guideline.\n'

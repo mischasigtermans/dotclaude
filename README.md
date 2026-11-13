@@ -8,7 +8,7 @@ This isn't a template to clone wholesale. The voice rules, project paths, and bi
 
 - **CLAUDE.md**: the agent. How it talks, how it codes. Always on.
 - **rules/**: context that loads on its own. Most load every session; `ui.md` and `laravel.md` carry `paths:` frontmatter and load only when Claude reads a matching file.
-- **[skills](https://github.com/mischasigtermans/skills)**: behaviour for a class of task, loaded when the ask matches or when I type the slash command. They live in their own repo, as the `development` and `writing` plugins.
+- **skills/**: behaviour for a class of task, loaded when the ask matches or when I type the slash command.
 - **hooks/**: what prose can't enforce. My most frequent corrections were things CLAUDE.md already said, so the recurring ones are hooks.
 - **evals/**: scenarios that run CLAUDE.md against a small repo and grade what Claude does with it.
 
@@ -25,22 +25,35 @@ Rules enter context when loaded; skill names and descriptions enter discovery co
 
 ## Skills
 
-Two packages share one source repo and one marketplace:
+Thirteen skills, each a folder in `skills/` with a `SKILL.md`. Claude loads one when the ask matches its description, or when I type its name.
 
-- **development:** finish, handoff, sync-docs, repo-docs, ui, motion, design-pack, solo, panel, laravel-forge and cloud-database. For Claude Code, with the sharpen gate.
-- **writing:** sharpen and mail. For Desktop and Code, without hooks. Development depends on Writing.
+| Skill | What it does |
+| --- | --- |
+| [finish](skills/finish/SKILL.md) | Takes a finished change through one round before its commit: simplify, review twice, docs, format, tests, a look at the UI, a report |
+| [handoff](skills/handoff/SKILL.md) | Writes a briefing for a fresh session and the one-line prompt that points at it |
+| [sync-docs](skills/sync-docs/SKILL.md) | Finds where the docs, guidelines and copy have drifted from the code, with `file:line` evidence, and fixes on my word |
+| [repo-docs](skills/repo-docs/SKILL.md) | My standard for READMEs, changelogs, commit messages, versions and `.github` files |
+| [sharpen](skills/sharpen/SKILL.md) | Names each AI pattern in a draft, quotes the line and gives the fix, then rewrites on my word. On Claude's own copy it fixes without asking |
+| [mail](skills/mail/SKILL.md) | Drafts, replies and forwards in Apple Mail: a plain body, anything with accents or formatting as an attachment, and a check of the draft before it goes |
+| [ui](skills/ui/SKILL.md) | Craft for surfaces, typography and feel, which library to pick, and how to review an interface |
+| [motion](skills/motion/SKILL.md) | Names an effect, finds what should animate, reviews animation code and plans motion work |
+| [design-pack](skills/design-pack/SKILL.md) | Fetches the ui.sh design guidelines through its MCP server and says how to work with them |
+| [solo](skills/solo/SKILL.md) | Operates Solo: long-running processes, scratchpads and todos, workers, locks and timers |
+| [panel](skills/panel/SKILL.md) | Runs independent reviewers on Claude, Codex or Grok who cross-examine each other and sign one report |
+| [laravel-forge](skills/laravel-forge/SKILL.md) | Deploys, logs, environment files and service commands through the Forge CLI |
+| [cloud-database](skills/cloud-database/SKILL.md) | Copies a Laravel Cloud database between environments and guards against its two traps: the wrong direction, and orphan tables that break the next migrate |
 
-This machine uses `development@local` and `writing@local`, with package sources under `~/Github/mischasigtermans/skills/plugins/`. Claude Code reads a plugin from a local directory marketplace in place, so an edit there reaches new sessions at once and an open session after `/reload-plugins`. To try a checkout without installing it, pass both package directories with `--plugin-dir`.
+To take one, copy its folder into your own `~/.claude/skills/`, or let the [skills CLI](https://github.com/vercel-labs/skills) do it:
 
-To install them from the marketplace:
-
-```text
-/plugin marketplace add mischasigtermans/by-mischa
-/plugin install development@by-mischa
-/plugin install writing@by-mischa
+```bash
+npx skills add mischasigtermans/dotclaude --skill sharpen
 ```
 
-Desktop needs only Writing. `development:ui` is the craft skill; `development:design-pack` fetches the [ui.sh](https://ui.sh) design guidelines through its MCP server and needs an account there.
+A skill brings no tools of its own. solo and panel need [Solo](https://soloterm.com), laravel-forge the `forge` CLI, cloud-database the `cloud` CLI and `mysql`, mail the macuse Apple Mail connector, and design-pack a [ui.sh](https://ui.sh) account with its MCP server connected. finish uses the `laravel@laravel` plugin for its simplify step, and Personas with Parley for its review.
+
+sharpen and mail don't need Claude Code. Claude Desktop takes them as uploaded skills.
+
+On my machine `skills/` also holds what tools put there: clauset's two skills, the one from Rex, and the skills Claude syncs from claude.ai. Those stay out of the repo.
 
 ## Hooks
 
@@ -52,6 +65,7 @@ Desktop needs only Writing. `development:ui` is the craft skill; `development:de
 | [`ui-gate.py`](hooks/ui-gate.py) | PreToolUse Edit/Write | Sends `rules/ui.md` with the first UI edit when no UI file was read (the path rule didn't load) |
 | [`memory-gate.py`](hooks/memory-gate.py) | PreToolUse Edit/Write | Denies feedback memories (a rule belongs in the repo's guideline, or here when it's how I work everywhere) and status in project memories |
 | [`scope-gate.py`](hooks/scope-gate.py) | PreToolUse Edit/Write | Reminds edits to the setup and plugin skills to check scope, once per home session or per distinct edit from a project. Retrying passes; it does not validate the text. Local tool-managed skills are excluded |
+| [`sharpen-gate.py`](hooks/sharpen-gate.py) | Stop | Sends Claude through the sharpen skill once it wrote 150 or more words of prose to `.md`, `.mdx` or `.txt` files in a turn |
 | [`php-format.py`](hooks/php-format.py) | PostToolUse, Stop | Notes edited PHP files (never Blade); at Stop runs Pint on them and PHPStan, blocks on errors |
 | [`dash-lint.py`](hooks/dash-lint.py) | PostToolUse Edit/Write | Flags em dashes, en dashes and middle dots in copy |
 
@@ -73,7 +87,7 @@ Runs use your own Claude account and count against its limits. Three runs of eve
 
 ## Plugins, tools and MCP servers
 
-`settings.json` enables the plugins; they install from their own marketplaces. My plugins include: [Development](https://github.com/mischasigtermans/skills) (Code skills and the sharpen gate), [Writing](https://github.com/mischasigtermans/skills) (prose and mail), [Personas](https://github.com/mischasigtermans/claude-personas) (advisors like Taylor Otwell and Steve Jobs), [Parley](https://github.com/mischasigtermans/claude-parley) (projects and personas consult each other, alone or in a gathering), [Library](https://github.com/mischasigtermans/claude-library) (search my past Claude chats and sessions) and [Ralph](https://github.com/mischasigtermans/claude-ralph) (an autonomous build loop). From others: Laravel's [agent-skills](https://github.com/laravel/agent-skills) (`laravel`, `laravel-cloud`, `laravel-lsp`), Firecrawl as the web layer, [OpenSEO](https://github.com/every-app/open-seo), Claude Security, Security Guidance, the Rust and Swift language servers, and the built-in `cc-plugin-you-should-know`.
+`settings.json` enables the plugins; they install from their own marketplaces. My plugins include: [Personas](https://github.com/mischasigtermans/claude-personas) (advisors like Taylor Otwell and Steve Jobs), [Parley](https://github.com/mischasigtermans/claude-parley) (projects and personas consult each other, alone or in a gathering), [Library](https://github.com/mischasigtermans/claude-library) (search my past Claude chats and sessions) and [Ralph](https://github.com/mischasigtermans/claude-ralph) (an autonomous build loop). From others: Laravel's [agent-skills](https://github.com/laravel/agent-skills) (`laravel`, `laravel-cloud`, `laravel-lsp`), Firecrawl as the web layer, [OpenSEO](https://github.com/every-app/open-seo), Claude Security, Security Guidance, the Rust and Swift language servers, and the built-in `cc-plugin-you-should-know`.
 
 [clauset](https://github.com/mischasigtermans/clauset) runs several Claude Code accounts on this one `~/.claude`: every account shares these settings, rules, hooks and plugins, and `clauset switch` moves a running session to another account when the one it runs on nears its limit. The status line and two of the hooks in `settings.json` call it.
 
@@ -93,7 +107,7 @@ A hook needs its file and its entry in `settings.json`. The status line needs `n
 
 ## What stays out
 
-The `.gitignore` is a whitelist: anything not listed stays out. No `settings.local.json`, plugin caches, memory, project data, logs, tokens or session history, and no skills: mine live in the plugin, and what a tool installs or a licence keeps private stays local. To add a file, whitelist it explicitly.
+The `.gitignore` is a whitelist: anything not listed stays out. No `settings.local.json`, plugin caches, memory, project data, logs, tokens or session history, and of the skills only my own: what a tool installs or syncs stays local. To add a file, whitelist it explicitly.
 
 Public instructions hold reusable preferences and methods. Project decisions belong in their own guidelines; local routing and private context stay ignored. [`scope-gate.py`](hooks/scope-gate.py) reminds the author to check that boundary. The shell guard covers common direct commands and wrappers; it is not a complete shell parser or a security sandbox.
 
@@ -112,6 +126,7 @@ Public instructions hold reusable preferences and methods. Project decisions bel
 - [Mischa Sigtermans](https://github.com/mischasigtermans)
 - The rules in CLAUDE.md on changes that trace to the request, the minimum implementation and a check for every step come from [Andrej Karpathy's notes on LLM coding](https://x.com/karpathy/status/2015883857489522876), via [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills).
 - The hook set and its tests take their shape from [affaan-m/ECC](https://github.com/affaan-m/ECC).
+- sharpen started from [Peter Yang](https://github.com/petergyang)'s [no-ai-slop](https://github.com/petergyang/no-ai-slop). ui and motion started from the skills [Emil Kowalski](https://github.com/emilkowalski) and [Jakub Krehel](https://github.com/jakubkrehel) published. The text and the examples here are written new.
 - `rtk-rewrite.sh` is the hook [rtk](https://github.com/rtk-ai/rtk) generates.
 
 ## License

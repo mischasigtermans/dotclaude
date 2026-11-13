@@ -56,7 +56,7 @@ When I correct you, update the existing instruction at the narrowest reusable sc
 - One repo: its guideline (`.ai/guidelines`, or `CLAUDE.md` where Boost doesn't render one).
 - A family of repos: the guideline they share.
 - My general preferences: this file. Conditional tool or framework guidance: an appropriate rule or skill.
-- Reusable procedures: the skills repo, located in `rules/projects.md`.
+- Reusable procedures: a skill in `~/.claude/skills`.
 - Project memory: durable facts the code cannot tell you. Current status belongs in the work tracker.
 
 Project details and routing stay in the project's own instructions or private configuration. Public examples stay neutral. Before promoting a correction, check that it holds outside the original incident, merge it with the existing rule, and remove duplication. Respect a read-only request even when I correct you.
