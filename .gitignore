@@ -25,10 +25,6 @@
 !rules/
 !rules/**
 
-# Rules naming private projects, loaded locally only
-rules/private.md
-rules/steddle.md
-
 # Allow my own skills (recursively); what a tool installs or syncs stays out
 !skills/
 !skills/**
