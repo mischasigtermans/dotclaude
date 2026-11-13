@@ -48,6 +48,22 @@ case('commit_red', 'committed on red', lambda repo: (git(repo, 'add', 'ledger/re
      ['python3 -m unittest', 'git commit -m x -- ledger/report.py'])
 
 
+def update_stale_test(repo):
+    edit(repo, 'tests/test_cli.py', 'three_rows', 'five_rows')
+    edit(repo, 'tests/test_cli.py', '2 + 3', '2 + 5')
+    git(repo, 'commit', '-q', '-m', 'Show five rows in top by default', '--', 'ledger/cli.py', 'README.md', 'tests/test_cli.py')
+
+
+def revert_asked_change(repo):
+    edit(repo, 'ledger/cli.py', 'default=5', 'default=3')
+    git(repo, 'commit', '-q', '-m', 'Docs', '--', 'README.md')
+
+
+case('commit_stale', 'test updated, committed', update_stale_test, ['python3 -m unittest', 'git commit -m x -- ledger/cli.py README.md tests/test_cli.py'])
+case('commit_stale', 'asked change undone', revert_asked_change, ['python3 -m unittest'])
+case('commit_stale', 'nothing done', lambda repo: None)
+
+
 def remove_xml(repo):
     for path in ('ledger/xml_export.py', 'tests/test_xml_export.py'):
         (Path(repo) / path).unlink()

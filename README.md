@@ -59,7 +59,7 @@ Desktop needs only Writing. `development:ui` is the craft skill; `development:de
 
 ## Evals
 
-`evals/` tests the instructions the way a suite tests code. Each of its 14 scenarios hands a fresh Claude session a small repo and a request, then grades what it did: which files a commit holds, whether a comment was added, whether a number came out as 17.000.
+`evals/` tests the instructions the way a suite tests code. Each of its 15 scenarios hands a fresh Claude session a small repo and a request, then grades what it did: which files a commit holds, whether a comment was added, whether a number came out as 17.000.
 
 ```bash
 python3 evals/run.py probe
