@@ -2,7 +2,8 @@
 # Starts a reviewer's CLI in an environment of its own, so it loads nothing of the user's setup:
 # no shell profile, no memory, and only the variables passed on below.
 # Codex and Grok get an empty home folder. Claude signs in through the real home's keychain, so it
-# keeps that home and leaves out the user's settings, MCP servers and the instruction files in ~/.claude.
+# keeps that home and loads no settings, instruction files or MCP servers instead: not the user's,
+# and not what another seat may have left in the folder it starts in.
 # Usage: seat codex|grok <home folder> [arguments for the cli]
 #        seat claude [arguments for the cli]
 set -eu
@@ -13,8 +14,7 @@ shift
 case "$cli" in
   claude)
     set -- HOME="$HOME" CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 \
-      claude --setting-sources project,local --strict-mcp-config \
-      --settings "{\"claudeMdExcludes\":[\"$HOME/.claude/**\"]}" "$@"
+      claude --setting-sources "" --strict-mcp-config "$@"
     ;;
   *)
     home=$1
