@@ -64,25 +64,30 @@ Only when another session is building in the subject's repo.
 
 ## 4. Workers
 
-A seat starts clean. Left alone, a CLI loads the user's own setup before it reads its first line. Grok reads `~/.claude`: the instructions, the rules files, the skills, and the hooks and MCP servers of the plugins. It adds its memory of earlier sessions. Every CLI inherits the shell's environment, secrets included. A reviewer that starts that way works under the user's instructions, and the other lab receives what the brief left out. What a seat needs to know about the project reaches it through the brief, as material to test.
+A seat starts clean. Left alone, a CLI loads the user's own setup before it reads its first line. Claude Code loads the user's instructions, rules, skills, plugins, hooks and MCP servers. Grok reads the same `~/.claude` and adds its memory of earlier sessions. Every CLI inherits the shell's environment, secrets included. A reviewer that starts that way works under the user's instructions, and another lab receives what the brief left out. What a seat needs to know about the project reaches it through the brief, as material to test.
 
-So Codex and Grok seats start through the reviewer tools, never the plain ones. `list_agent_tools` shows them as `Codex (reviewer)` and `Grok (reviewer)`. Each runs `seat` from this folder with the CLI's name. `seat` takes the seat's own home folder, `<run>/homes/<name>`, as its first argument and starts the CLI with that empty home, no shell profile, no memory, and only the variables it lists. The sign-in comes through `CODEX_HOME` and `GROK_HOME`, and `cargo` through `RUSTUP_HOME` and `CARGO_HOME`. In that home `gh` isn't signed in and the Herd CLI doesn't run; git, Node, PHP, Composer and Python do. When a reviewer tool is missing, ask the user to add it: its command is the path of `seat`, followed by `codex` or `grok`.
+So every seat starts through a reviewer tool, never a plain one. `list_agent_tools` shows them as `Codex (reviewer)`, `Grok (reviewer)` and `Claude (reviewer)`. Each runs `seat` from this folder with the CLI's name, and `seat` passes on only the variables it lists, with no shell profile:
 
-`spawn_agent` per reviewer, `include_agent_instructions: false`, the lab and model in the process name:
+- **Codex and Grok** take the seat's own home folder, `<run>/homes/<name>`, as the first argument and start with that empty home and no memory. The sign-in comes through `CODEX_HOME` and `GROK_HOME`, and `cargo` through `RUSTUP_HOME` and `CARGO_HOME`. In that home `gh` isn't signed in and the Herd CLI doesn't run; git, Node, PHP, Composer and Python do.
+- **Claude** signs in through the real home's keychain, so it keeps that home. `seat` leaves out the user's settings, and with them the skills, plugins and hooks, the MCP servers, and the instruction files in `~/.claude`.
+
+No seat runs under the user's guard hooks. When a reviewer tool is missing, ask the user to add it: its command is the path of `seat`, followed by `codex`, `grok` or `claude`.
+
+`spawn_agent` per reviewer, with `working_dir: <run>`, `include_agent_instructions: false`, and the lab and model in the process name:
 
 | Lab | Agent tool | extra_args |
 |---|---|---|
-| Codex | `Codex (reviewer)` | `<run>/homes/<name> --yolo -C <run> -m gpt-6-astra -c model_reasoning_effort="xhigh"`, plus `--search` when the brief needs the web |
-| Grok | `Grok (reviewer)` | `<run>/homes/<name> --cwd <run> -m grok-4.7 --effort xhigh --always-approve` |
-| Claude | the user's Claude tool | `--model opus --add-dir <run>` |
+| Codex | `Codex (reviewer)` | `<run>/homes/<name> --yolo -m gpt-6-astra -c model_reasoning_effort="xhigh"`, plus `--search` when the brief needs the web |
+| Grok | `Grok (reviewer)` | `<run>/homes/<name> -m grok-4.7 --effort xhigh --always-approve` |
+| Claude | `Claude (reviewer)` | `--permission-mode auto --model opus` |
 
-The models and effort levels are examples: pass the ones the user runs for each lab. A Claude seat can't start clean: it starts in the Solo project's directory and loads that project's `CLAUDE.md` and the user's own instructions. Weigh its findings with that in mind.
+The models and effort levels are examples: pass the ones the user runs for each lab. A Claude seat takes `--permission-mode auto`: with `--dangerously-skip-permissions` it stops at Claude Code's bypass warning on every start, since the settings that hold the user's answer are left out.
 
 - Before the start line, read the worker's screen (`get_process_output`): it must sit at an empty prompt. The Codex and Grok dialogs that catch a start line, and why every line to them goes through `send_input`, are in `solo`'s `workers.md`.
 - The start line is one line: the reviewer's name, the brief's path, its output path. The brief itself lives in `briefs/`.
 - After the start line, check what each Grok seat loaded. `prompt_context.json` in its session folder must show an empty `agents_md_files` and `memory_v2_enabled: false`. A seat that loaded anything is closed, and its files are deleted before another seat reads them.
-- Read each worker's usage limit on its screen before a round opens. A reviewer with little left gets a work order in its brief: its own defence first, then high, medium, low. One that stops at its limit keeps its partial work, and a Claude worker on Opus takes the seat: it reads the seat's files, finishes the round, defends the seat's findings from then on and signs in its own name. The report names the seat and the round it changed hands.
-- Record each CLI session id in the scratchpad. Codex: the id in `~/.codex/sessions/<y>/<m>/<d>/rollout-<time>-<id>.jsonl`, found by grepping for the start line; resume with `resume <id>` first in extra_args. Grok: `~/.grok/sessions/<cwd, url-encoded>/<id>/`; resume with `--resume <id>`. Grok keys that folder to the run folder's path, so rename it when a run folder moves. A reviewer's subagents write session files of their own that hold the same start line, so take the oldest.
+- Read each worker's usage limit on its screen before a round opens. A reviewer with little left gets a work order in its brief: its own defence first, then high, medium, low. One that stops at its limit keeps its partial work, and a Claude seat on Opus takes it over: it reads the seat's files, finishes the round, defends the seat's findings from then on and signs in its own name. The report names the seat and the round it changed hands.
+- Record each CLI session id in the scratchpad. Codex: the id in `~/.codex/sessions/<y>/<m>/<d>/rollout-<time>-<id>.jsonl`, found by grepping for the start line; resume with `resume <id>` first in extra_args. Grok: `~/.grok/sessions/<cwd, url-encoded>/<id>/`; resume with `--resume <id>`. Claude: `<config dir>/projects/<the run folder's path with `/`, `.` and `_` turned into `-`>/<id>.jsonl`; resume with `--resume <id>`. Grok keys that folder to the run folder's path, so rename it when a run folder moves. A reviewer's subagents write session files of their own that hold the same start line, so take the oldest.
 
 ## 5. Rounds
 
