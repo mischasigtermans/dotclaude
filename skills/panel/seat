@@ -1,0 +1,28 @@
+#!/bin/sh
+# Starts a reviewer's CLI in an environment of its own, so it loads nothing of the user's setup:
+# an empty home folder, no shell profile, no memory, and only the variables passed on below.
+# Usage: seat <cli> <home folder> [arguments for the cli]
+set -eu
+
+cli=$1
+home=$2
+shift 2
+mkdir -p "$home"
+
+exec env -i \
+  PATH="$PATH" \
+  TERM="${TERM:-xterm-256color}" \
+  COLORTERM="${COLORTERM:-}" \
+  LANG="${LANG:-en_US.UTF-8}" \
+  USER="$USER" \
+  LOGNAME="${LOGNAME:-$USER}" \
+  SHELL="${SHELL:-/bin/sh}" \
+  TMPDIR="${TMPDIR:-/tmp}" \
+  HOME="$home" \
+  ZDOTDIR="$home" \
+  GROK_HOME="${GROK_HOME:-$HOME/.grok}" \
+  GROK_MEMORY=0 \
+  CODEX_HOME="${CODEX_HOME:-$HOME/.codex}" \
+  RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}" \
+  CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}" \
+  "$cli" "$@"

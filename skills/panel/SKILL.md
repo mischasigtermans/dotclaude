@@ -30,11 +30,11 @@ Decide the rest yourself and state it in the plan:
 - **In place or snapshot.** `list_processes` on the subject's Solo project. An agent building there means a snapshot (section 3). None means the reviewers read the subject in place, read-only, and you run `git status --short` after every round.
 - **Subagents.** When the subject is more than one context window can read in full (a whole app, a standard with annexes), the brief lets each reviewer spawn its own CLI's subagents for context: Codex `multi_agent`, Grok's subagents, Claude's Agent tool. Never a Solo process from a worker: each is a full CLI with its own MCP stack.
 - **What they investigate.** The user's ask, plus what you would look for yourself, split into areas. Each reviewer starts in a different area, so they read in different orders.
-- **Earlier runs.** A subject with a run in `~/.claude/panels/<project>/` before: read its joint report and its review of the fixes. The brief names each fixed finding with its commit; reviewers re-check it only where the source changed since, and don't report it again.
+- **Earlier runs.** A subject with a run in `~/.panels/<project>/` before: read its joint report and its review of the fixes. The brief names each fixed finding with its commit; reviewers re-check it only where the source changed since, and don't report it again.
 
 ## 2. The run folder
 
-`~/.claude/panels/<project>/<yyyy-mm-dd>-<slug>/`, never the session scratchpad: that sits under `/private/tmp` and goes with the session, and a review of the fixes later needs the round files.
+`~/.panels/<project>/<yyyy-mm-dd>-<slug>/`. Never the session scratchpad: that sits under `/private/tmp` and goes with the session, and a review of the fixes later needs the round files. Never inside a repo or an agent's config folder either: a CLI takes the instruction files of the repo it starts in as its own, whatever home folder it got.
 
 ```
 briefs/                     one file per round, from briefs.md
@@ -43,6 +43,7 @@ UPDATES.md                  snapshot runs only: what changed under the reviewers
 round-1/ round-2/ round-3/  <name>.md per reviewer
 round-2b/ round-3b/         coverage (<name>.md, <name>-ledger.txt) and the answers to round 3
 notes/<name>/               scratch for a reviewer and its subagents
+homes/<name>/               the empty home folder a Codex or Grok seat starts with
 joint/                      tally.md, draft.md, review-<name>.md, report.md, changes.md, signoff-<name>.md
 review/                     <name>.md per reviewer, for the review of the fixes
 tree/                       the snapshot, when there is one
@@ -63,20 +64,25 @@ Only when another session is building in the subject's repo.
 
 ## 4. Workers
 
+A seat starts clean. Left alone, a CLI loads the user's own setup before it reads its first line. Grok reads `~/.claude`: the instructions, the rules files, the skills, and the hooks and MCP servers of the plugins. It adds its memory of earlier sessions. Every CLI inherits the shell's environment, secrets included. A reviewer that starts that way works under the user's instructions, and the other lab receives what the brief left out. What a seat needs to know about the project reaches it through the brief, as material to test.
+
+So Codex and Grok seats start through the reviewer tools, never the plain ones. `list_agent_tools` shows them as `Codex (reviewer)` and `Grok (reviewer)`. Each runs `seat` from this folder with the CLI's name. `seat` takes the seat's own home folder, `<run>/homes/<name>`, as its first argument and starts the CLI with that empty home, no shell profile, no memory, and only the variables it lists. The sign-in comes through `CODEX_HOME` and `GROK_HOME`, and `cargo` through `RUSTUP_HOME` and `CARGO_HOME`. In that home `gh` isn't signed in and the Herd CLI doesn't run; git, Node, PHP, Composer and Python do. When a reviewer tool is missing, ask the user to add it: its command is the path of `seat`, followed by `codex` or `grok`.
+
 `spawn_agent` per reviewer, `include_agent_instructions: false`, the lab and model in the process name:
 
-| Lab | extra_args |
-|---|---|
-| Codex | `-C <run> -m gpt-6-astra -c model_reasoning_effort="xhigh"`, plus `--search` when the brief needs the web |
-| Grok | `--cwd <run> -m grok-4.7 --effort xhigh --always-approve` |
-| Claude | `--model opus --add-dir <run>`: it starts in the Solo project's directory and loads that project's `CLAUDE.md` |
+| Lab | Agent tool | extra_args |
+|---|---|---|
+| Codex | `Codex (reviewer)` | `<run>/homes/<name> --yolo -C <run> -m gpt-6-astra -c model_reasoning_effort="xhigh"`, plus `--search` when the brief needs the web |
+| Grok | `Grok (reviewer)` | `<run>/homes/<name> --cwd <run> -m grok-4.7 --effort xhigh --always-approve` |
+| Claude | the user's Claude tool | `--model opus --add-dir <run>` |
 
-The models and effort levels are examples: pass the ones the user runs for each lab.
+The models and effort levels are examples: pass the ones the user runs for each lab. A Claude seat can't start clean: it starts in the Solo project's directory and loads that project's `CLAUDE.md` and the user's own instructions. Weigh its findings with that in mind.
 
 - Before the start line, read the worker's screen (`get_process_output`): it must sit at an empty prompt. The Codex and Grok dialogs that catch a start line, and why every line to them goes through `send_input`, are in `solo`'s `workers.md`.
 - The start line is one line: the reviewer's name, the brief's path, its output path. The brief itself lives in `briefs/`.
+- After the start line, check what each Grok seat loaded. `prompt_context.json` in its session folder must show an empty `agents_md_files` and `memory_v2_enabled: false`. A seat that loaded anything is closed, and its files are deleted before another seat reads them.
 - Read each worker's usage limit on its screen before a round opens. A reviewer with little left gets a work order in its brief: its own defence first, then high, medium, low. One that stops at its limit keeps its partial work, and a Claude worker on Opus takes the seat: it reads the seat's files, finishes the round, defends the seat's findings from then on and signs in its own name. The report names the seat and the round it changed hands.
-- Record each CLI session id in the scratchpad. Codex: the id in `~/.codex/sessions/<y>/<m>/<d>/rollout-<time>-<id>.jsonl`, found by grepping for the start line; resume with `resume <id>` first in extra_args. Grok: `~/.grok/sessions/<cwd, url-encoded>/<id>/`; resume with `--resume <id>`. A reviewer's subagents write session files of their own that hold the same start line, so take the oldest.
+- Record each CLI session id in the scratchpad. Codex: the id in `~/.codex/sessions/<y>/<m>/<d>/rollout-<time>-<id>.jsonl`, found by grepping for the start line; resume with `resume <id>` first in extra_args. Grok: `~/.grok/sessions/<cwd, url-encoded>/<id>/`; resume with `--resume <id>`. Grok keys that folder to the run folder's path, so rename it when a run folder moves. A reviewer's subagents write session files of their own that hold the same start line, so take the oldest.
 
 ## 5. Rounds
 
@@ -112,4 +118,4 @@ On the user's word, resume the same sessions, so the reviewers keep their contex
 
 ## 8. Close
 
-Close each worker with `close_process` the moment its last file is verified. Delete `tree/` (git still holds the commit) and the copies in `context/` of what a live system holds: the schema dump, plans, todos and deltas go stale, and the next session would read them as true. Briefs, rounds, ledgers, notes and `joint/` stay.
+Close each worker with `close_process` the moment its last file is verified. Delete `tree/` (git still holds the commit), `homes/` (a resumed seat gets a fresh one) and the copies in `context/` of what a live system holds: the schema dump, plans, todos and deltas go stale, and the next session would read them as true. Briefs, rounds, ledgers, notes and `joint/` stay.

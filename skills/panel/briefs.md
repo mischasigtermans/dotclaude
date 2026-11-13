@@ -23,6 +23,7 @@ Deliverable, in the end: one joint report in <language> that all <n> of you sign
 7. <snapshot: Read <run>/UPDATES.md when you start and before you finish any file.>
 8. <disclosure, when the authors asked: <who> wrote the subject and asked for this review. Weigh that as an outside reviewer would.>
 9. No time estimates. Size a fix by what it touches.
+10. <Codex and Grok seats: Your home folder is an empty one made for this seat. A tool that keeps its sign-in or settings there starts without them: `gh` isn't signed in.>
 
 ## Gates
 <the four review gates from SKILL.md, verbatim>

@@ -212,7 +212,7 @@ check "scope: home, first edit"    "$S" "$(scope_payload "scope-$$-b" "$HOME_PRO
 check "scope: home, later edits"   "$S" "$(scope_payload "scope-$$-b" "$HOME_PROJECT" "$HOME/.claude/rules/x.md" 'Other text.')" silent
 check "scope: setup dir is home"   "$S" "$(scope_payload "scope-$$-b" "$HOME_PROJECT--claude-skills" "$HOME/.claude/hooks/x.py" 'More.')" silent
 check "scope: handoff"             "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/handoffs/site-2026-01-01-x.md" x)" silent
-check "scope: panel run"           "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/panels/site/run/briefs/round-1.md" x)" silent
+check "scope: panel run"           "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.panels/site/run/briefs/round-1.md" x)" silent
 check "scope: memory file"         "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/projects/-p-site/memory/a.md" x)" silent
 check "scope: synced skill"        "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/skills/synced/a/SKILL.md" x)" silent
 for skill in accounts clauset rex; do
