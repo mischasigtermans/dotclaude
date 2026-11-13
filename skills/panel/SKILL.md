@@ -69,7 +69,7 @@ A seat starts clean. Left alone, a CLI loads the user's own setup before it read
 So every seat starts through a reviewer tool, never a plain one. `list_agent_tools` shows them as `Codex (reviewer)`, `Grok (reviewer)` and `Claude (reviewer)`. Each runs `seat` from this folder with the CLI's name, and `seat` passes on only the variables it lists, with no shell profile:
 
 - **Codex and Grok** take the seat's own home folder, `<run>/homes/<name>`, as the first argument and start with that empty home and no memory. The sign-in comes through `CODEX_HOME` and `GROK_HOME`, and `cargo` through `RUSTUP_HOME` and `CARGO_HOME`. In that home `gh` isn't signed in and the Herd CLI doesn't run; git, Node, PHP, Composer and Python do.
-- **Claude** signs in through the real home's keychain, so it keeps that home and loads no settings instead: no skills, plugins, hooks, MCP servers or instruction files, the user's or the run folder's.
+- **Claude** signs in through the real home's keychain, so it keeps that home and loads no settings instead: no skills, plugins, hooks, MCP servers or instruction files, the user's or the run folder's. Its built-in browser tools are off.
 
 No seat runs under the user's guard hooks. When a reviewer tool is missing, ask the user to add it: its command is the path of `seat`, followed by `codex`, `grok` or `claude`.
 
