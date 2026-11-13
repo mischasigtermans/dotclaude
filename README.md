@@ -32,7 +32,7 @@ Two packages share one source repo and one marketplace:
 
 This machine uses `development@local` and `writing@local`, with package sources under `~/Github/mischasigtermans/skills/plugins/`. Claude Code reads a plugin from a local directory marketplace in place, so an edit there reaches new sessions at once and an open session after `/reload-plugins`. To try a checkout without installing it, pass both package directories with `--plugin-dir`.
 
-After publishing the skills repo and marketplace entries:
+To install them from the marketplace:
 
 ```text
 /plugin marketplace add mischasigtermans/by-mischa
