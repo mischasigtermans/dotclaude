@@ -150,7 +150,7 @@ SHARPEN='{"type":"tool_use","name":"Skill","input":{"skill":"sharpen"}}'
 NEXT='{"type":"user","message":{"content":"apply it"}}'
 META='{"type":"user","isMeta":true,"message":{"content":"[Image: original 390x2600]"}}'
 
-SG="python3 $HOOKS/sharpen-gate.py"
+SG="python3 $HOOKS/../skills/sharpen/hooks/sharpen-gate.py"
 transcript "$(readme 200)"
 check "sharpen: long README"        "$SG" "$(stop_payload)" '"block"'
 check "sharpen: already active"     "$SG" "$(stop_payload true)" silent

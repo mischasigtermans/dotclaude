@@ -51,7 +51,9 @@ npx skills add mischasigtermans/dotclaude --skill sharpen
 
 A skill brings no tools of its own. solo and panel need [Solo](https://soloterm.com), laravel-forge the `forge` CLI, cloud-database the `cloud` CLI and `mysql`, mail the macuse Apple Mail connector, and design-pack a [ui.sh](https://ui.sh) account with its MCP server connected. finish uses the `laravel@laravel` plugin for its simplify step, and Personas with Parley for its review.
 
-sharpen and mail don't need Claude Code. Claude Desktop takes them as uploaded skills.
+sharpen carries its own Stop hook, [`sharpen-gate.py`](skills/sharpen/hooks/sharpen-gate.py): once Claude wrote 150 or more words of prose to `.md`, `.mdx` or `.txt` files in a turn, it goes through the skill before the turn ends. Claude Code loads the folder as the plugin `sharpen@skills-dir`, and the skill keeps its plain name.
+
+sharpen and mail don't need Claude Code. Claude Desktop takes them as uploaded skills; for sharpen, zip the folder without `.claude-plugin` and `hooks`, which are Claude Code's.
 
 On my machine `skills/` also holds what tools put there: clauset's two skills, the one from Rex, and the skills Claude syncs from claude.ai. Those stay out of the repo.
 
@@ -65,11 +67,10 @@ On my machine `skills/` also holds what tools put there: clauset's two skills, t
 | [`ui-gate.py`](hooks/ui-gate.py) | PreToolUse Edit/Write | Sends `rules/ui.md` with the first UI edit when no UI file was read (the path rule didn't load) |
 | [`memory-gate.py`](hooks/memory-gate.py) | PreToolUse Edit/Write | Denies feedback memories (a rule belongs in the repo's guideline, or here when it's how I work everywhere) and status in project memories |
 | [`scope-gate.py`](hooks/scope-gate.py) | PreToolUse Edit/Write | Reminds edits to the setup and plugin skills to check scope, once per home session or per distinct edit from a project. Retrying passes; it does not validate the text. Local tool-managed skills are excluded |
-| [`sharpen-gate.py`](hooks/sharpen-gate.py) | Stop | Sends Claude through the sharpen skill once it wrote 150 or more words of prose to `.md`, `.mdx` or `.txt` files in a turn |
 | [`php-format.py`](hooks/php-format.py) | PostToolUse, Stop | Notes edited PHP files (never Blade); at Stop runs Pint on them and PHPStan, blocks on errors |
 | [`dash-lint.py`](hooks/dash-lint.py) | PostToolUse Edit/Write | Flags em dashes, en dashes and middle dots in copy |
 
-`bash hooks/tests/run.sh` pipes fake payloads through every hook and asserts on the output. All hooks fail open: an internal error never blocks a tool call.
+`bash hooks/tests/run.sh` pipes fake payloads through every hook, sharpen's gate included, and asserts on the output. All hooks fail open: an internal error never blocks a tool call.
 
 ## Evals
 
@@ -103,7 +104,7 @@ A rule drops in with a one-liner:
 curl -fsSL https://raw.githubusercontent.com/mischasigtermans/dotclaude/main/rules/orchestration.md -o ~/.claude/rules/orchestration.md
 ```
 
-A hook needs its file and its entry in `settings.json`. The status line needs `npx ccstatusline` set to show the context-percentage widget alone, since the wrapper reads its whole output as one number, and clauset for the account name.
+A hook needs its file and its entry in `settings.json`; sharpen's comes with its folder. The status line needs `npx ccstatusline` set to show the context-percentage widget alone, since the wrapper reads its whole output as one number, and clauset for the account name.
 
 ## What stays out
 

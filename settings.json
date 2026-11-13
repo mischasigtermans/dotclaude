@@ -83,10 +83,6 @@
             "type": "command",
             "command": "python3 ~/.claude/hooks/php-format.py",
             "timeout": 240
-          },
-          {
-            "type": "command",
-            "command": "python3 ~/.claude/hooks/sharpen-gate.py"
           }
         ]
       }

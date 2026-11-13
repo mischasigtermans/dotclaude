@@ -1,0 +1,8 @@
+{
+  "name": "sharpen",
+  "version": "0.1.0",
+  "description": "Sends the prose Claude wrote in a turn through the sharpen skill before the turn ends.",
+  "author": {
+    "name": "Mischa Sigtermans"
+  }
+}
