@@ -23,7 +23,8 @@ Use these headings, since agents scan them:
 ```
 
 Tools:
-- `scratchpad_write`: full write, revision-guarded
+- `scratchpad_create`: a new pad; it can't overwrite one
+- `scratchpad_write`: full write of an existing pad, revision-guarded
 - `scratchpad_edit`: targeted edit without rewriting the whole pad
 - `scratchpad_append` / `scratchpad_append_section`: append raw or under a specific heading
 - `scratchpad_read` / `scratchpad_tail`: read the whole pad or only the latest entries
