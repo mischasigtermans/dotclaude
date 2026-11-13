@@ -27,7 +27,7 @@ Rules enter context when loaded; skill names and descriptions enter discovery co
 
 Two packages share one source repo and one marketplace:
 
-- **development:** finish, handoff, sync-docs, repo-docs, ui, motion, solo, panel, laravel-forge and cloud-database. For Claude Code, with the sharpen gate.
+- **development:** finish, handoff, sync-docs, repo-docs, ui, motion, design-pack, solo, panel, laravel-forge and cloud-database. For Claude Code, with the sharpen gate.
 - **writing:** sharpen and mail. For Desktop and Code, without hooks. Development depends on Writing.
 
 This machine uses `development@local` and `writing@local`, with package sources under `~/Github/mischasigtermans/skills/plugins/`. Claude Code reads a plugin from a local directory marketplace in place, so an edit there reaches new sessions at once and an open session after `/reload-plugins`. To try a checkout without installing it, pass both package directories with `--plugin-dir`.
@@ -40,7 +40,7 @@ After publishing the skills repo and marketplace entries:
 /plugin install writing@by-mischa
 ```
 
-Desktop needs only Writing. The licensed design pack at `~/.claude/skills/ui` remains local; the Code craft skill is `development:ui`.
+Desktop needs only Writing. `development:ui` is the craft skill; `development:design-pack` fetches the [ui.sh](https://ui.sh) design guidelines through its MCP server and needs an account there.
 
 ## Hooks
 
@@ -93,7 +93,7 @@ A hook needs its file and its entry in `settings.json`. The status line needs `n
 
 ## What stays out
 
-The `.gitignore` is a whitelist: anything not listed stays out. No `settings.local.json`, plugin caches, memory, project data, logs, tokens or session history, and no skills: mine live in the plugin, and what a tool installs or a licence keeps private stays local. The `ui` design pack that `rules/ui.md` points at is one of those. To add a file, whitelist it explicitly.
+The `.gitignore` is a whitelist: anything not listed stays out. No `settings.local.json`, plugin caches, memory, project data, logs, tokens or session history, and no skills: mine live in the plugin, and what a tool installs or a licence keeps private stays local. To add a file, whitelist it explicitly.
 
 Public instructions hold reusable preferences and methods. Project decisions belong in their own guidelines; local routing and private context stay ignored. [`scope-gate.py`](hooks/scope-gate.py) reminds the author to check that boundary. The shell guard covers common direct commands and wrappers; it is not a complete shell parser or a security sandbox.
 
