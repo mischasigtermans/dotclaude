@@ -8,10 +8,11 @@ This isn't a template to clone wholesale. The voice rules, project paths, and bi
 
 - **CLAUDE.md**: the agent. How it talks, how it codes. Always on.
 - **rules/**: context that loads on its own. Most load every session; `ui.md` and `laravel.md` carry `paths:` frontmatter and load only when Claude reads a matching file.
+- **[skills](https://github.com/mischasigtermans/skills)**: behaviour for a class of task, loaded when the ask matches or when I type the slash command. They live in their own repo, as the `development` and `writing` plugins.
 - **hooks/**: what prose can't enforce. My most frequent corrections were things CLAUDE.md already said, so the recurring ones are hooks.
 - **evals/**: scenarios that run CLAUDE.md against a small repo and grade what Claude does with it.
 
-My skills live in two plugins in [mischasigtermans/skills](https://github.com/mischasigtermans/skills). Rules enter context when loaded; skill names and descriptions enter discovery context, with bodies loaded on invocation. Hooks run outside model context but their messages enter it.
+Rules enter context when loaded; skill names and descriptions enter discovery context, with bodies loaded on invocation. Hooks run outside model context but their messages enter it.
 
 ## Rules
 
