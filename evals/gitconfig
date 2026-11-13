@@ -1,0 +1,11 @@
+[user]
+	name = Dev
+	email = dev@example.test
+[init]
+	defaultBranch = main
+[advice]
+	detachedHead = false
+[commit]
+	gpgsign = false
+[tag]
+	gpgsign = false

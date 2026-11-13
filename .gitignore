@@ -27,13 +27,7 @@
 
 # Rules naming private projects, loaded locally only
 rules/private.md
-
-# Allow skills (recursively)
-!skills/
-!skills/**
-
-# claude.ai-synced skills (Anthropic, proprietary licenses)
-skills/synced/
+rules/steddle.md
 
 # Allow hooks (recursively)
 !hooks/
@@ -41,7 +35,13 @@ skills/synced/
 
 # rtk auto-regenerates this checksum on first run; no value committing it
 hooks/.rtk-hook.sha256
-parley-session
 
 # Python bytecode from running the hooks
 hooks/__pycache__/
+
+# Allow the instruction evals (recursively); run output and trial variants stay local
+!evals/
+!evals/**
+evals/results/
+evals/variants/
+evals/__pycache__/

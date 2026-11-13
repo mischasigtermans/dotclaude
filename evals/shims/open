@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "$(date +%s) open $*" >> "${AB_SHIM_LOG:-/dev/null}"
+echo "open: not available in this environment" >&2
+exit 1

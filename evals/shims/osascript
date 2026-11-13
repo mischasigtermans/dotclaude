@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "$(date +%s) osascript $*" >> "${AB_SHIM_LOG:-/dev/null}"
+echo "osascript: not available in this environment" >&2
+exit 1
