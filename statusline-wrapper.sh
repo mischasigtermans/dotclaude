@@ -1,6 +1,7 @@
 #!/bin/bash
 
 input=$(cat)
+account=$(echo "$input" | ~/.local/bin/clauset statusline 2>/dev/null)
 git_info=$(echo "$input" | bash ~/.claude/statusline-command.sh)
 context_pct=$(echo "$input" | npx ccstatusline 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g; s/ //g; s/%//')
 pct_num=${context_pct%%.*}
@@ -11,4 +12,4 @@ else
   context_display="${pct_num}%"
 fi
 
-printf '%s · %s' "$git_info" "$context_display"
+printf '%s%s · %s' "${account:+$account · }" "$git_info" "$context_display"

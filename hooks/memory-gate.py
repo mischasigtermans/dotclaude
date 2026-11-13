@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -32,7 +33,7 @@ def deny(reason):
 try:
     event = json.load(sys.stdin)
     args = event.get('tool_input', {})
-    path = args.get('file_path', '')
+    path = os.path.realpath(args.get('file_path', ''))
     if MEMORY_FILE.search(path) and not path.endswith('/MEMORY.md'):
         text = args.get('content') or args.get('new_string') or ''
         head = text if TYPE.search(text) else (Path(path).read_text() if Path(path).exists() else '')
@@ -42,9 +43,10 @@ try:
             root = project_root(event.get('cwd', '.'))
             repo = (f'{root}/.ai/guidelines/<topic>.md, then `php artisan boost:update`'
                     if (root / '.ai/guidelines').is_dir() else f'{root}/CLAUDE.md')
-            deny('Rules never go in memory. Write this one at the widest scope where it holds: '
-                 '~/.claude/CLAUDE.md for all my work, ~/.claude/rules/ or a skill for one kind of work, '
-                 f'{repo} for this repo. Say in one line where it went.')
+            deny('Rules never go in memory. Write this one where it belongs. '
+                 f'For this repo: {repo}. For a family of repos: the guideline they share. '
+                 'For how I work in every project, naming none: ~/.claude/CLAUDE.md, ~/.claude/rules/ or a skill. '
+                 'Say in one line where it went.')
         elif kind == 'project' and STATUS.search(text):
             deny(f'Memory holds facts, not status ("{STATUS.search(text).group(0)}"). '
                  'Work in flight goes in a Solo todo or scratchpad, what happened is in git. '

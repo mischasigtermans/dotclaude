@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import os
 import re
 import sys
 
@@ -11,7 +12,7 @@ DOT = re.compile(r'.{0,30}·.{0,30}')
 
 try:
     args = json.load(sys.stdin).get('tool_input', {})
-    path = args.get('file_path', '')
+    path = os.path.realpath(args.get('file_path', ''))
     text = args.get('content') or args.get('new_string') or ''
     text = re.sub(r'```.*?```|`[^`\n]*`', '', text, flags=re.S)
     if COPY_PATH.search(path) and not SKIP_PATH.search(path):

@@ -6,7 +6,8 @@
   "env": {
     "CLAUDE_CODE_NO_FLICKER": "1",
     "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
-    "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet"
+    "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "attribution": {
     "commit": "",
@@ -17,6 +18,7 @@
     "allow": [],
     "defaultMode": "auto"
   },
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -51,16 +53,10 @@
           {
             "type": "command",
             "command": "python3 ~/.claude/hooks/memory-gate.py"
-          }
-        ]
-      },
-      {
-        "matcher": "Artifact|mcp__claude-artifacts__.*|mcp__claude_ai_Claude_Docs__.*",
-        "hooks": [
+          },
           {
             "type": "command",
-            "command": "~/.local/bin/clauset hook guard",
-            "timeout": 5
+            "command": "python3 ~/.claude/hooks/scope-gate.py"
           }
         ]
       }
@@ -87,15 +83,20 @@
             "type": "command",
             "command": "python3 ~/.claude/hooks/php-format.py",
             "timeout": 240
-          },
-          {
-            "type": "command",
-            "command": "python3 ~/.claude/hooks/sharpen-gate.py"
           }
         ]
       }
     ],
     "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh -c 'rex __internal session-start --agent claude 2>/dev/null || true'",
+            "timeout": 5
+          }
+        ]
+      },
       {
         "hooks": [
           {
@@ -108,14 +109,14 @@
     ],
     "StopFailure": [
       {
+        "matcher": "rate_limit",
         "hooks": [
           {
             "type": "command",
             "command": "~/.local/bin/clauset hook limit",
             "timeout": 5
           }
-        ],
-        "matcher": "rate_limit"
+        ]
       }
     ]
   },
@@ -128,7 +129,6 @@
     "padding": 0
   },
   "enabledPlugins": {
-    "codex@openai-codex": true,
     "frontend-design@claude-plugins-official": false,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "swift-lsp@claude-plugins-official": true,
@@ -139,8 +139,6 @@
     "david-tolnay@by-mischa": true,
     "ralph@by-mischa": true,
     "security-guidance@claude-plugins-official": true,
-    "claude-md-management@claude-plugins-official": true,
-    "cloudflare@cloudflare": true,
     "stripe@claude-plugins-official": false,
     "claude-security@claude-plugins-official": true,
     "library@by-mischa": true,
@@ -150,7 +148,11 @@
     "laravel-cloud@laravel": true,
     "laravel@laravel": true,
     "laravel-lsp@laravel": true,
-    "parley@by-mischa": true
+    "parley@by-mischa": true,
+    "cc-plugin-you-should-know@builtin": true,
+    "openseo@openseo": true,
+    "writing@local": true,
+    "development@local": true
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
@@ -189,21 +191,72 @@
         "source": "github",
         "repo": "laravel/agent-skills"
       }
+    },
+    "openseo": {
+      "source": {
+        "source": "github",
+        "repo": "every-app/open-seo"
+      }
     }
   },
+  "feedbackDrafts": "quiet",
+  "subagentPromptCacheTtl": "1h",
   "effortLevel": "high",
   "modelSettings": {
     "claude-opus-5-5": {
       "effortLevel": "high"
+    },
+    "claude-fable-5-1": {
+      "effortLevel": "high"
+    },
+    "claude-fable-5-2": {
+      "effortLevel": "xhigh"
+    }
+  },
+  "advisorModel": "fable",
+  "pluginConfigs": {
+    "cc-plugin-agents-md@builtin": {
+      "options": {
+        "instructionFiles": "claude-md"
+      }
     }
   },
   "autoUpdatesChannel": "latest",
+  "timeFormat": "24-hour",
   "autoDreamEnabled": true,
   "skipDangerousModePermissionPrompt": true,
   "theme": "light",
+  "editorMode": "normal",
   "verbose": true,
-  "switchModelsOnFlag": false,
+  "precomputeCompactionEnabled": true,
+  "switchModelsOnFlag": true,
+  "autoContinueAtUsageLimit": true,
   "teammateMode": "in-process",
+  "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": false,
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "autoMode": {
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Cloud provider(s)**: None configured",
+      "**Internal sharing / snippet hosting**: None configured: treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: None configured",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Host containment**: None configured: assume Claude Code runs on an ordinary developer machine with open internet",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: None configured",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment",
+      "**Protected deployment namespaces / environments**: None configured: fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development, personal and admin tasks, and multi-agent orchestration across personal projects",
+      "**Org-specific CLIs**: forge, herd, rtk, firecrawl, ykman, profiles: personal tooling observed in usage, not org-mandated"
+    ]
+  }
 }

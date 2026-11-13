@@ -1,24 +1,88 @@
 #!/usr/bin/env python3
 import json
+import os
 import re
 import shlex
 import sys
 
 TRAILER = re.compile(r'co-authored-by|signed-off-by', re.I)
+TEST_RUNNER = re.compile(r'pest|phpunit|paratest|artisan(\s+test|$)')
 TAG_READ_FLAGS = {'-l', '--list', '--contains', '--no-contains', '--merged', '--no-merged', '--points-at', '--sort', '-n'}
+KEYWORDS = {'if', 'then', 'else', 'elif', 'while', 'until', 'do', '!', '{', 'time', 'nohup'}
+RUNNERS = {'nice', 'timeout', 'xargs'}
+
+
+HEREDOC = re.compile(r'(?<!<)<<(?!<)-?\s*([\'"]?)([A-Za-z_]\w*)\1')
+
+
+def without_heredocs(command):
+    """Drop heredoc bodies: they are data for the command that reads them, unless that command is a shell.
+
+    A body is only dropped when its closing word appears on a later line, so `<<` in a string or in
+    arithmetic never hides the commands that follow it.
+    """
+    lines = command.split('\n')
+    kept, index = [], 0
+    while index < len(lines):
+        line = lines[index]
+        kept.append(line)
+        index += 1
+        opened = HEREDOC.search(line)
+        if not opened:
+            continue
+        closing = next((later for later in range(index, len(lines)) if lines[later].strip() == opened.group(2)), None)
+        if closing is None:
+            continue
+        if re.search(r'(^|[\s;&|/])(bash|sh|zsh)\s', line[:opened.start()] + ' '):
+            kept.extend(lines[index:closing])
+        index = closing + 1
+    return '\n'.join(kept)
 
 
 def segments(command):
-    lexer = shlex.shlex(command, posix=True, punctuation_chars=';&|')
+    command = without_heredocs(command)
+    lexer = shlex.shlex(command, posix=True, punctuation_chars=';\n&|()')
+    lexer.whitespace = ' \t\r'
+    lexer.commenters = ''
     lexer.whitespace_split = True
     segment = []
     for token in lexer:
-        if token and set(token) <= set(';&|'):
+        if token and set(token) <= set(';\n&|()'):
             yield segment
             segment = []
         else:
             segment.append(token)
     yield segment
+
+
+def executable(segment):
+    """Unwrap common launchers without treating ordinary arguments as commands."""
+    args = list(segment)
+    while args:
+        if re.match(r'^[A-Za-z_][A-Za-z_0-9]*=', args[0]):
+            args.pop(0)
+            continue
+        name = os.path.basename(args[0])
+        if name in ('command', 'exec', 'env', 'sudo'):
+            args.pop(0)
+            while args and args[0].startswith('-'):
+                flag = args.pop(0)
+                if flag in ('-u', '-g', '--user', '--group', '--unset') and args:
+                    args.pop(0)
+            continue
+        if name == 'rtk' and len(args) > 1 and args[1] == 'proxy':
+            args = args[2:]
+            continue
+        if name in KEYWORDS:
+            args.pop(0)
+            continue
+        if name in RUNNERS:
+            args.pop(0)
+            while args and (args[0].startswith('-') or re.fullmatch(r'\d+(\.\d+)?[smhd]?', args[0])):
+                args.pop(0)
+            continue
+        return name, args[1:]
+    return '', []
 
 
 def git_violation(args):
@@ -56,17 +120,24 @@ def main():
     command = json.load(sys.stdin).get('tool_input', {}).get('command', '')
     reason = None
 
-    if re.search(r'\bgit\b[^|;&]*\bcommit\b', command) and TRAILER.search(command):
-        reason = 'Commit messages carry no Co-Authored-By or other trailer.'
-
     if not reason:
         try:
             for seg in segments(command):
-                if 'git' in seg:
-                    reason = git_violation(seg[seg.index('git') + 1:])
-                elif any(t.endswith('pint') for t in seg) and '--dirty' in seg:
+                name, args = executable(seg)
+                if name == 'git':
+                    reason = git_violation(args)
+                    message = command if '<<' in command else ' '.join(args)
+                    if 'commit' in args and TRAILER.search(message):
+                        reason = 'Commit messages carry no Co-Authored-By or other trailer.'
+                elif name in ('pkill', 'killall') and TEST_RUNNER.search(' '.join(args)):
+                    reason = ('Stop the run you started, by its PID. Never pkill or killall a test runner: '
+                              'other sessions share this machine and their suites die with it.')
+                elif name == 'herd' and args[:1] == ['secure']:
+                    reason = ('Never herd secure from a session: without keychain access it writes an Nginx config for a '
+                              'certificate that never exists, and every .test site goes down. Ask Mischa to secure the site in the Herd app.')
+                elif name == 'pint' and '--dirty' in args:
                     reason = 'Never pint --dirty: it formats files other sessions changed. The Stop hook formats the files you touched.'
-                elif any(t.endswith('pint') for t in seg) and '--blade' in seg:
+                elif name == 'pint' and '--blade' in args:
                     reason = "Never pint --blade: the Blade formatter moves whitespace around {{ }} and directives and changes the rendered text."
                 if reason:
                     break

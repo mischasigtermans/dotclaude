@@ -37,6 +37,40 @@ check "guard: pint dirty"        "$G" "$(bash_payload 'vendor/bin/pint --dirty -
 check "guard: pint blade"         "$G" "$(bash_payload 'vendor/bin/pint --blade resources/views/a.blade.php')" '"deny"'
 check "guard: pint files"        "$G" "$(bash_payload 'vendor/bin/pint app/Models/User.php')" silent
 check "guard: unrelated"         "$G" "$(bash_payload 'ls -la && echo "git add -A"')" silent
+check "guard: pkill pest"        "$G" "$(bash_payload 'pkill -f pest')" 'PID'
+check "guard: killall phpunit"   "$G" "$(bash_payload 'cd app && killall -9 phpunit')" '"deny"'
+check "guard: pkill artisan test" "$G" "$(bash_payload 'pkill -f "artisan test"')" '"deny"'
+check "guard: kill by pid"       "$G" "$(bash_payload 'kill 48213')" silent
+check "guard: pkill other"       "$G" "$(bash_payload 'pkill -f vite')" silent
+check "guard: pkill queue worker" "$G" "$(bash_payload 'pkill -f "artisan queue:work"')" silent
+check "guard: herd secure"       "$G" "$(bash_payload 'herd secure mysite')" 'Herd app'
+check "guard: herd links"        "$G" "$(bash_payload 'herd links')" silent
+
+check "guard: newline commands" "$G" "$(bash_payload $'git status\ngit add -A')" '"deny"'
+check "guard: absolute git" "$G" "$(bash_payload '/usr/bin/git add -A')" '"deny"'
+check "guard: absolute pkill" "$G" "$(bash_payload '/usr/bin/pkill -f pest')" '"deny"'
+check "guard: echo arguments" "$G" "$(bash_payload 'echo git add -A')" silent
+check "guard: echo trailer" "$G" "$(bash_payload 'echo git commit Co-Authored-By')" silent
+check "guard: quoted newline" "$G" "$(bash_payload $'printf "git status\ngit add -A"')" silent
+check "guard: env wrapper" "$G" "$(bash_payload 'env LANG=C /usr/bin/git add -A')" '"deny"'
+check "guard: command wrapper" "$G" "$(bash_payload 'command git add -A')" '"deny"'
+check "guard: then keyword" "$G" "$(bash_payload 'if true; then git add -A; fi')" '"deny"'
+check "guard: do keyword" "$G" "$(bash_payload 'for f in a; do git commit -am x; done')" '"deny"'
+check "guard: time prefix" "$G" "$(bash_payload 'time git add -A')" '"deny"'
+check "guard: nice prefix" "$G" "$(bash_payload 'nice -n 10 git add .')" '"deny"'
+check "guard: timeout prefix" "$G" "$(bash_payload 'timeout 30 git add -A')" '"deny"'
+check "guard: brace group" "$G" "$(bash_payload '{ git add -A; }')" '"deny"'
+check "guard: negation" "$G" "$(bash_payload '! git add -A')" '"deny"'
+check "guard: condition, add by path" "$G" "$(bash_payload 'if git diff --quiet; then git add app/a.php; fi')" silent
+check "guard: heredoc trailer" "$G" "$(bash_payload $'git commit -F - -- a <<\'EOF\'\nFix login\n\nCo-Authored-By: Claude\nEOF')" 'trailer'
+check "guard: heredoc clean" "$G" "$(bash_payload $'git commit -F - -- a <<\'EOF\'\nFix login\nEOF')" silent
+check "guard: heredoc to python" "$G" "$(bash_payload $'python3 - <<\'EOF\'\nprint("x")\ngit add -A\nthen git add -A\nEOF')" silent
+check "guard: heredoc to file" "$G" "$(bash_payload $'cat > notes.md <<EOF\ngit add -A\nEOF\nls')" silent
+check "guard: heredoc to shell" "$G" "$(bash_payload $'bash <<\'EOF\'\ngit add -A\nEOF')" '"deny"'
+check "guard: after a heredoc" "$G" "$(bash_payload $'cat > notes.md <<EOF\nnotes\nEOF\ngit add -A')" '"deny"'
+check "guard: here-string" "$G" "$(bash_payload $'grep x <<< hello\ngit add -A')" '"deny"'
+check "guard: shift arithmetic" "$G" "$(bash_payload $'echo $((1<<2))\ngit add -A')" '"deny"'
+check "guard: heredoc in a string" "$G" "$(bash_payload $'echo "use <<EOF for heredocs"\ngit add -A')" '"deny"'
 
 C="python3 $HOOKS/config-protect.py"
 check "config: pint.json"        "$C" "$(file_payload /p/pint.json '{}')" '"deny"'
@@ -50,6 +84,10 @@ check "dash: md en dash"         "$D" "$(file_payload /p/README.md $'2019–2021
 check "dash: clean md"           "$D" "$(file_payload /p/README.md 'Fast, and cheap.')" silent
 check "dash: php code"           "$D" "$(file_payload /p/app/X.php $'// a — b')" silent
 check "dash: memory file"        "$D" "$(file_payload "$HOME/.claude/projects/x/memory/a.md" $'a — b')" silent
+# clauset gives each account a config dir whose projects/ links to ~/.claude/projects.
+ACCOUNT="$TMP/.claude-accounts/work"
+mkdir -p "$ACCOUNT" && ln -s "$HOME/.claude/projects" "$ACCOUNT/projects"
+check "dash: account memory file" "$D" "$(file_payload "$ACCOUNT/projects/x/memory/a.md" $'a — b')" silent
 check "dot: md middle dot"       "$D" "$(file_payload /p/README.md $'Fast · cheap')" '"block"'
 check "dot: lang middle dot"     "$D" "$(file_payload /p/lang/en/app.php $'Fast · cheap')" '"block"'
 check "dot: formula in code"     "$D" "$(file_payload /p/README.md 'The formula `v²/(2·decel)` holds.')" silent
@@ -63,22 +101,6 @@ transcript() {
     printf '{"type":"assistant","message":{"content":[%s]}}\n' "$call" >> "$TMP/t.jsonl"
   done
 }
-stop_payload() { jq -cn --argjson a "${1:-false}" '{session_id:"test",transcript_path:"'"$TMP"'/t.jsonl",hook_event_name:"Stop",stop_hook_active:$a}'; }
-words() { python3 -c "print(' '.join(['word']*$1))"; }
-
-S="python3 $HOOKS/sharpen-gate.py"
-transcript "$(jq -cn --arg t "$(words 200)" '{type:"tool_use",name:"Write",input:{file_path:"/p/README.md",content:$t}}')"
-check "sharpen: long README"     "$S" "$(stop_payload)" '"block"'
-check "sharpen: already active"  "$S" "$(stop_payload true)" silent
-transcript "$(jq -cn --arg t "$(words 200)" '{type:"tool_use",name:"Write",input:{file_path:"/p/README.md",content:$t}}')" '{"type":"tool_use","name":"Skill","input":{"skill":"sharpen"}}'
-check "sharpen: ran already"     "$S" "$(stop_payload)" silent
-transcript "$(jq -cn --arg t "$(words 60)" '{type:"tool_use",name:"Write",input:{file_path:"/p/README.md",content:$t}}')"
-check "sharpen: short"           "$S" "$(stop_payload)" silent
-transcript "$(jq -cn --arg t "$(words 200)" '{type:"tool_use",name:"Write",input:{file_path:"/p/skills/x/SKILL.md",content:$t}}')"
-check "sharpen: SKILL.md"        "$S" "$(stop_payload)" silent
-transcript "$(jq -cn --arg t "$(words 200)" '{type:"tool_use",name:"mcp__macuse__mail_compose_message",input:{body:$t}}')"
-check "sharpen: mail draft"      "$S" "$(stop_payload)" '"block"'
-
 U="python3 $HOOKS/ui-gate.py"
 ui_payload() { jq -cn --arg s "$1" --arg p "$2" '{session_id:$s,transcript_path:"'"$TMP"'/t.jsonl",tool_name:"Edit",tool_input:{file_path:$p}}'; }
 transcript '{"type":"tool_use","name":"Bash","input":{"command":"cat index.html"}}'
@@ -107,14 +129,40 @@ MEM="$HOME/.claude/projects/-p/memory"
 mem_payload() { jq -cn --arg p "$1" --arg t "$2" --arg c "${3:-$TMP}" '{cwd:$c,tool_name:"Write",tool_input:{file_path:$p,content:$t}}'; }
 fm() { printf -- '---\nname: x\ndescription: x\nmetadata:\n  type: %s\n---\n\n%s\n' "$1" "$2"; }
 mkdir -p "$TMP/boost/.ai/guidelines" "$TMP/plain"
-check "mem: feedback denied"       "$M" "$(mem_payload "$MEM/a.md" "$(fm feedback 'Always ask first.')" "$TMP/plain")" 'CLAUDE.md'
+check "mem: feedback denied"       "$M" "$(mem_payload "$MEM/a.md" "$(fm feedback 'Always ask first.')" "$TMP/plain")" 'For this repo: .*plain/CLAUDE.md.*every project'
 check "mem: feedback boost"        "$M" "$(mem_payload "$MEM/a.md" "$(fm feedback 'Always ask first.')" "$TMP/boost")" 'boost:update'
 check "mem: project status"        "$M" "$(mem_payload "$MEM/b.md" "$(fm project 'Branch is uncommitted, next steps below.')")" '"deny"'
-check "mem: project fact"          "$M" "$(mem_payload "$MEM/b.md" "$(fm project 'Prod runs on Forge server pxl-nl.')")" silent
+check "mem: project fact"          "$M" "$(mem_payload "$MEM/b.md" "$(fm project 'Prod runs on Forge server web-1.')")" silent
 check "mem: todo reference"        "$M" "$(mem_payload "$MEM/b.md" "$(fm project 'The plan lives in Solo todo 288; all pending migrations ran clean.')")" silent
 check "mem: user fact"             "$M" "$(mem_payload "$MEM/c.md" "$(fm user 'Works in Dutch.')")" silent
 check "mem: index"                 "$M" "$(mem_payload "$MEM/MEMORY.md" '- [a](a.md) pending')" silent
 check "mem: not a memory dir"      "$M" "$(mem_payload /p/docs/a.md "$(fm feedback 'x')")" silent
+check "mem: account feedback"      "$M" "$(mem_payload "$ACCOUNT/projects/-p/memory/a.md" "$(fm feedback 'Always ask first.')" "$TMP/plain")" '"deny"'
+
+S="python3 $HOOKS/scope-gate.py"
+scope_payload() { jq -cn --arg s "$1" --arg d "$2" --arg p "$3" --arg t "$4" '{session_id:$s,transcript_path:("/c/projects/"+$d+"/s.jsonl"),tool_name:"Edit",tool_input:{file_path:$p,new_string:$t}}'; }
+HOME_PROJECT=$(printf '%s' "$HOME" | sed 's/[^A-Za-z0-9]/-/g')
+check "scope: project session"     "$S" "$(scope_payload "scope-$$-a" -p-site "$HOME/.claude/rules/x.md" 'A rule.')" 'every project'
+check "scope: same edit again"     "$S" "$(scope_payload "scope-$$-a" -p-site "$HOME/.claude/rules/x.md" 'A rule.')" silent
+check "scope: new text, new check" "$S" "$(scope_payload "scope-$$-a" -p-site "$HOME/.claude/rules/x.md" 'Another rule.')" '"deny"'
+check "scope: home, first edit"    "$S" "$(scope_payload "scope-$$-b" "$HOME_PROJECT" "$HOME/.claude/CLAUDE.md" 'A rule.')" '"deny"'
+check "scope: home, later edits"   "$S" "$(scope_payload "scope-$$-b" "$HOME_PROJECT" "$HOME/.claude/rules/x.md" 'Other text.')" silent
+check "scope: setup dir is home"   "$S" "$(scope_payload "scope-$$-b" "$HOME_PROJECT--claude-skills" "$HOME/.claude/hooks/x.py" 'More.')" silent
+check "scope: handoff"             "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/handoffs/site-2026-01-01-x.md" x)" silent
+check "scope: panel run"           "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/panels/site/run/briefs/round-1.md" x)" silent
+check "scope: memory file"         "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/projects/-p-site/memory/a.md" x)" silent
+check "scope: synced skill"        "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/skills/synced/a/SKILL.md" x)" silent
+for skill in accounts clauset rex ui; do
+  check "scope: local $skill" "$S" "$(scope_payload "scope-$$-local-$skill" -p-site "$HOME/.claude/skills/$skill/SKILL.md" 'A local rule.')" silent
+done
+check "scope: exact setup filename" "$S" "$(scope_payload "scope-$$-suffix" -p-site "$HOME/.claude/CLAUDE.md.backup" x)" silent
+check "scope: tool state"          "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/clauset/config.toml" x)" silent
+check "scope: project guideline"   "$S" "$(scope_payload "scope-$$-c" -p-site /p/site/CLAUDE.md x)" silent
+PLUGIN="$HOME/Github/mischasigtermans/skills"
+check "scope: plugin skill"        "$S" "$(scope_payload "scope-$$-c" -p-site "$PLUGIN/plugins/development/skills/x/SKILL.md" 'A step.')" '"deny"'
+check "scope: plugin readme"       "$S" "$(scope_payload "scope-$$-c" -p-site "$PLUGIN/README.md" x)" silent
+check "scope: plugin repo is home" "$S" "$(scope_payload "scope-$$-b" "$HOME_PROJECT-Github-mischasigtermans-skills" "$PLUGIN/plugins/development/skills/x/SKILL.md" 'More.')" silent
+rm -f "${TMPDIR:-/tmp}"/claude-scope-gate/scope-$$-*
 
 R="bash $HOOKS/rtk-rewrite.sh"
 if command -v rtk >/dev/null; then
