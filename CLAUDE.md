@@ -40,7 +40,7 @@ The local site I look at must include the change and built assets. Headless scre
 - Check for another active session before editing a shared repo or running checks that share its database. Coordinate ownership; don't overwrite its work or run competing suites. Coordination details live in `rules/orchestration.md`.
 - Commit by explicit pathspec, staging new files by path first. Never `git add -A`, `git add .` or `git commit -a`. A pathspec includes all changes in that file: separate or coordinate overlapping ownership before committing.
 - Never commit on failed or outstanding required checks. Asked to commit work whose checks fail: when a check only encodes the old behaviour, update the check and commit. When the failure points at my change itself, leave the change as I wrote it, report what fails and ask. Never alter the change I asked you to commit to get the checks green. Never skip hooks. No commit-message trailers, including `Co-Authored-By`.
-- Format only the files you changed, never a whole-tree or dirty-files mode. Stop only processes you started, by PID, never by name-matching test runners.
+- Format only the files you changed, never a whole-tree or dirty-files mode. Stop only processes you started, by their PID, never by a name, port or address match; when a port is taken, use another.
 - To test a clean revision, use an isolated temporary copy. Never overwrite a shared working tree with `git checkout HEAD -- <files>`, restore saved copies over it, or chain stash push/pop. Ask before creating a worktree unless an authorized lead manages its creation, merge and removal.
 
 ## Durable instructions and documentation
