@@ -225,7 +225,7 @@ check "scope: own skill"           "$S" "$(scope_payload "scope-$$-c" -p-site "$
 check "scope: own skill, any file" "$S" "$(scope_payload "scope-$$-c" -p-site "$HOME/.claude/skills/ui/surfaces.md" 'A value.')" '"deny"'
 rm -f "${TMPDIR:-/tmp}"/claude-scope-gate/scope-$$-*
 
-R="bash $HOOKS/rtk-rewrite.sh"
+R="rtk hook claude"
 if command -v rtk >/dev/null; then
   check "rtk: rewrites git status" "$R" "$(bash_payload 'git status')" 'rtk'
 fi

@@ -61,7 +61,7 @@ On my machine `skills/` also holds what tools put there: clauset's two skills, t
 
 | Hook | Event | What it does |
 | --- | --- | --- |
-| [`rtk-rewrite.sh`](hooks/rtk-rewrite.sh) | PreToolUse Bash | Rewrites commands through rtk for smaller output |
+| `rtk hook claude` | PreToolUse Bash | [rtk](https://github.com/rtk-ai/rtk)'s built-in hook: rewrites commands through rtk for smaller output |
 | [`bash-guard.py`](hooks/bash-guard.py) | PreToolUse Bash | Denies `git add -A`/`.`, `commit -a`, commit trailers, `--no-verify`, a `core.hooksPath` override, any `git tag` that writes, `pint --dirty` and `--blade`, `pkill` or `killall` on a test runner, `herd secure` |
 | [`config-protect.py`](hooks/config-protect.py) | PreToolUse Edit/Write | Denies edits to Pint, PHPStan, Prettier and ESLint config: fix the code, not the linter |
 | [`ui-gate.py`](hooks/ui-gate.py) | PreToolUse Edit/Write | Sends `rules/ui.md` with the first UI edit when no UI file was read (the path rule didn't load) |
@@ -128,8 +128,7 @@ Public instructions hold reusable preferences and methods. Project decisions bel
 - The rules in CLAUDE.md on changes that trace to the request, the minimum implementation and a check for every step come from [Andrej Karpathy's notes on LLM coding](https://x.com/karpathy/status/2015883857489522876), via [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills).
 - The hook set and its tests take their shape from [affaan-m/ECC](https://github.com/affaan-m/ECC).
 - sharpen started from [Peter Yang](https://github.com/petergyang)'s [no-ai-slop](https://github.com/petergyang/no-ai-slop). ui and motion started from the skills [Emil Kowalski](https://github.com/emilkowalski) and [Jakub Krehel](https://github.com/jakubkrehel) published. The text and the examples here are written new.
-- `rtk-rewrite.sh` is the hook [rtk](https://github.com/rtk-ai/rtk) generates.
 
 ## License
 
-MIT. See [LICENSE](LICENSE). `hooks/rtk-rewrite.sh` is rtk's generated hook, under rtk's Apache License 2.0.
+MIT. See [LICENSE](LICENSE).
