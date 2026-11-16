@@ -17,6 +17,8 @@ case "$cli" in
       claude --setting-sources "" --strict-mcp-config --no-chrome "$@"
     ;;
   *)
+    # Solo probes an agent tool's health with `--version` alone, and refuses to spawn one whose probe fails.
+    [ "${1:-}" = "--version" ] && exec "$cli" --version
     home=$1
     shift
     mkdir -p "$home"
