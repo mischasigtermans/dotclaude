@@ -1,25 +1,20 @@
 # Workers and Coordination
 
-## Lead + worker orchestration
+## Lead and workers
 
-This is Solo's main workflow. Solo owns parallel work outside the lead's repo: it persists, runs agents from other labs (Codex, Grok) and shows up in the user's IDE.
+Solo owns parallel work outside the lead's repo: it persists, runs agents from other labs (Codex, Grok) and shows up in the user's IDE. Taking a batch of issues through workers, from the interview to the commit, is the `lead` skill. This file holds the Solo mechanics under it.
 
-Run every phase that applies and skip the rest:
-
-1. **Interview**: one lead agent asks one question at a time until it can write a plan. Don't spawn workers before you understand the goal.
-2. **Plan**: `scratchpad_create` the orchestration plan. Keep it short and self-contained, so no worker has to ask the lead for background.
-3. **Todos**: `todo_create` per lane, one worker's share of the work, with `todo_set_blockers` for dependencies. Block verification todos on implementation and integration todos on worker handoffs.
-4. **Dispatch**: `list_agent_tools` to see what's installed. `spawn_agent` for worker agents, only on lanes that are independent and unblocked (`spawn_process` is for non-agent processes like dev servers; don't mix them up). `working_dir` starts the worker in an existing folder, such as a sibling worktree, and `prompt` sends its first message: the answer's `prompt_delivery` says `delivered` or `pending`. Each worker gets a narrow prompt: objective, scratchpad reference, owned files, what not to touch, handoff expectations. Keep reusable worker briefs in a scratchpad so you don't retype them.
-5. **Monitor**: watch process state. `get_process_output` / `search_output` to read the output itself, not a summary. `timer_set` / `timer_fire_when_idle_any` / `timer_fire_when_idle_all` to wake on worker idle.
-6. **Maintain**: keep scratchpad and todos current as workers discover new context. Update blocked/unblocked. Comment on todos as state changes.
-7. **Integrate**: one lane at a time. Inspect the actual diff. Run focused verification. Then unblock the next lane.
-8. **Cleanup**: before `close_process` on a worker, capture its handoff (changed files, tests, blockers, risk) in `todo_comment_create`: once the process is gone, its chat history is gone. Inspect nested subagents before closing the parent.
+- **State**: the plan and each lane's state live in the project's work tracker where it has one. Without one, `scratchpad_create` the plan and `todo_create` per lane, one worker's share of the work, with `todo_set_blockers` for dependencies (`state.md`). Keep whichever it is current as workers discover new context.
+- **Dispatch**: `list_agent_tools` to see what's installed. `spawn_agent` for worker agents, only on lanes that are independent and unblocked (`spawn_process` is for non-agent processes like dev servers; don't mix them up). `working_dir` starts the worker in an existing folder, such as a sibling worktree, and `prompt` sends its first message: the answer's `prompt_delivery` says `delivered` or `pending`. Each worker gets a narrow prompt: objective, the brief's path, owned files, what not to touch, handoff expectations.
+- **Monitor**: watch process state. `get_process_output` / `search_output` to read the output itself, not a summary. `timer_set` / `timer_fire_when_idle_any` / `timer_fire_when_idle_all` to wake on worker idle.
+- **Integrate**: one lane at a time. Inspect the actual diff. Run focused verification. Then unblock the next lane.
+- **Cleanup**: before `close_process` on a worker, capture its handoff (changed files, tests, blockers, risk) on its issue, or in `todo_comment_create`: once the process is gone, its chat history is gone. Inspect nested subagents before closing the parent.
 
 **Anti-patterns:**
-- Spawning workers before the interview is done
+- Spawning workers before you understand the goal
 - Asking a worker to 'solve the whole problem'
 - Trusting a worker's summary instead of reading its output
-- Treating chat scrollback as the orchestration record instead of the scratchpad
+- Treating chat scrollback as the orchestration record instead of the tracker or scratchpad
 
 ## Cross-lab specialists
 
@@ -51,7 +46,7 @@ A worker can't invoke an MCP prompt such as `/mcp__laravel-boost__laravel-code-s
 
 A brief goes in a scratchpad or a file, and the message is one line that points at it: the worker can read it again after a compaction, and so can whoever resumes the lane. A message of a dozen lines does arrive whole, as one turn.
 
-Lanes sharing one checkout commit by pathspec, and a pathspec commit takes the whole file as it stands. A file every lane appends to (an enum, `routes/web.php`, a lang file) gets one owner per round, or the lead commits it once every lane's hunk is in. Append-only edits at the end keep the hunks apart.
+Lanes sharing one checkout hand back uncommitted, and the lead commits each by pathspec (`rules/orchestration.md`). A pathspec commit takes the whole file as it stands, so a file every lane appends to (an enum, `routes/web.php`, a lang file) gets one owner per round, or the lead writes it once every lane's hunk is in. Append-only edits at the end keep the hunks apart.
 
 ## Coordination primitives
 

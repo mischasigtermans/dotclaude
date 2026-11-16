@@ -38,7 +38,7 @@ Prefer `scratchpad_edit` / `scratchpad_append_section` over rewriting the whole 
 Don't mirror them: mirroring guarantees drift. Pick one per piece of work.
 
 - **TaskCreate** (Claude Code harness): an in-session checklist that dies when the session ends. Use it for 'do these 4 things right now'.
-- **Solo todos**: survive sessions and support blockers, locks, comments and tags. The user sees them in their IDE. Use them for anything that must outlive this conversation or be picked up by another agent.
+- **Solo todos**: survive sessions and support blockers, locks, comments and tags. The user sees them in their IDE. Use them for anything that must outlive this conversation or be picked up by another agent, in a project without a work tracker of its own. Where the project has one, the work lives on its issues.
 
 Todos own:
 - A concrete objective

@@ -34,7 +34,7 @@ The local site I look at must include the change and built assets. Headless scre
 
 ## Git and shared work
 
-- Commit only when I ask. Two commits have my word already: a bug fix you met on the way, once its suite is green, and a finished step in a lane a lead steers (`rules/orchestration.md`). A current 'no commits' instruction overrides both. Push and tags always need my word unless I explicitly delegated that authority.
+- Commit only when I ask. Two commits have my word already: a bug fix you met on the way, once its suite is green, and a finished step or issue under a lead, made by the session `rules/orchestration.md` names for it. A current 'no commits' instruction overrides both. Push and tags always need my word unless I explicitly delegated that authority.
 - Before a push, read `git log --oneline @{upstream}..HEAD`. It sends the entire range, often to production. If another session owns a commit in it, identify it and get clearance before pushing.
 - Work on the agreed branch, and don't switch a shared checkout without authorization. Work I asked for never waits on a side branch for a condition I didn't set, such as a host going live: it goes onto local `main`, and only the push waits for my word.
 - Check for another active session before editing a shared repo or running checks that share its database. Coordinate ownership; don't overwrite its work or run competing suites. Coordination details live in `rules/orchestration.md`.
