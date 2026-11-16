@@ -99,7 +99,7 @@ def git_violation(args):
         return None
     sub, rest = args[i], args[i + 1:]
 
-    if sub == 'add' and any(a in ('-A', '--all', '.', ':/') for a in rest):
+    if sub == 'add' and any(a in ('-A', '--all', '.', ':/') for a in rest) and not any(a in ('-n', '--dry-run') for a in rest):
         return 'Stage by pathspec. Never git add -A or git add .: other sessions share this working tree.'
     if sub in ('commit', 'push', 'merge', 'rebase') and '--no-verify' in rest:
         return 'Never skip git hooks with --no-verify. Fix what the hook reports.'

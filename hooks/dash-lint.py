@@ -5,7 +5,7 @@ import re
 import sys
 
 COPY_PATH = re.compile(r'\.(md|mdx|txt|blade\.php|tsx|jsx|vue|svelte)$|/lang/')
-SKIP_PATH = re.compile(r'/node_modules/|/vendor/|/\.claude/(projects|plugins|skills/synced)/')
+SKIP_PATH = re.compile(r'/node_modules/|/vendor/|/\.panels/|/\.claude/(projects|plugins|panels|skills/synced)/')
 PROSE_PATH = re.compile(r'\.(md|mdx|txt)$|/lang/')
 DASH = re.compile(r'.{0,30}[–—].{0,30}')
 DOT = re.compile(r'.{0,30}·.{0,30}')

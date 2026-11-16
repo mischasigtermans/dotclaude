@@ -10,7 +10,10 @@ check() {
   local name=$1 hook=$2 payload=$3 expect=$4
   local out
   out=$(printf '%s' "$payload" | $hook 2>/dev/null)
-  if [ "$expect" = "silent" ]; then
+  local status=$?
+  if [ $status -ne 0 ]; then
+    echo "FAIL $name: the hook exited $status"; fail=1
+  elif [ "$expect" = "silent" ]; then
     [ -z "$out" ] && echo "ok   $name" || { echo "FAIL $name: expected no output, got $out"; fail=1; }
   else
     grep -q -- "$expect" <<<"$out" && echo "ok   $name" || { echo "FAIL $name: expected '$expect', got '$out'"; fail=1; }
@@ -24,6 +27,8 @@ G="python3 $HOOKS/bash-guard.py"
 check "guard: add -A"            "$G" "$(bash_payload 'git add -A')" '"deny"'
 check "guard: add ."             "$G" "$(bash_payload 'cd x && git add . && git commit -m wip')" '"deny"'
 check "guard: add pathspec"      "$G" "$(bash_payload 'git add app/Models/User.php')" silent
+check "guard: add -A as a dry run" "$G" "$(bash_payload 'git add -A --dry-run')" silent
+check "guard: add -n ."          "$G" "$(bash_payload 'git add -n .')" silent
 check "guard: commit -am"        "$G" "$(bash_payload 'git commit -am "fix"')" '"deny"'
 check "guard: commit pathspec"   "$G" "$(bash_payload 'git commit -m "Fix login" -- app/Http')" silent
 check "guard: trailer"           "$G" "$(bash_payload $'git commit -m "Fix\n\nCo-Authored-By: Claude"')" 'trailer'
@@ -88,6 +93,8 @@ check "dash: memory file"        "$D" "$(file_payload "$HOME/.claude/projects/x/
 ACCOUNT="$TMP/.claude-accounts/work"
 mkdir -p "$ACCOUNT" && ln -s "$HOME/.claude/projects" "$ACCOUNT/projects"
 check "dash: account memory file" "$D" "$(file_payload "$ACCOUNT/projects/x/memory/a.md" $'a — b')" silent
+check "dash: panel run file"     "$D" "$(file_payload "$HOME/.panels/site/run/context/probe.md" $'a — b')" silent
+check "dash: panel run file in the config dir" "$D" "$(file_payload "$HOME/.claude/panels/site/run/notes/a.md" $'a — b')" silent
 check "dot: md middle dot"       "$D" "$(file_payload /p/README.md $'Fast · cheap')" '"block"'
 check "dot: lang middle dot"     "$D" "$(file_payload /p/lang/en/app.php $'Fast · cheap')" '"block"'
 check "dot: formula in code"     "$D" "$(file_payload /p/README.md 'The formula `v²/(2·decel)` holds.')" silent
@@ -211,6 +218,12 @@ transcript "$(template /p/lang/en/app.php "<?php return ['a' => '$(words 30)', '
 check "sharpen: a lang file with sentences" "$SG" "$(stop_payload)" '"block"'
 transcript "$(template /p/resources/content/pages/home.json "{\"lede\": \"$(words 60)\"}")"
 check "sharpen: a content file with sentences" "$SG" "$(stop_payload)" '"block"'
+transcript "$(template /private/tmp/claude-501/-p/abc/scratchpad/notes.md "$(words 200)")"
+check "sharpen: a scratch file" "$SG" "$(stop_payload)" silent
+transcript "$(template /home/u/.claude-accounts/other/projects/-p/memory/note.md "$(words 200)")"
+check "sharpen: a memory note under another config dir" "$SG" "$(stop_payload)" silent
+transcript "$(template /home/u/.panels/site/2026-01-01-x/context/probe.md "$(words 200)")"
+check "sharpen: a panel run file" "$SG" "$(stop_payload)" silent
 
 S="python3 $HOOKS/scope-gate.py"
 scope_payload() { jq -cn --arg s "$1" --arg d "$2" --arg p "$3" --arg t "$4" '{session_id:$s,transcript_path:("/c/projects/"+$d+"/s.jsonl"),tool_name:"Edit",tool_input:{file_path:$p,new_string:$t}}'; }

@@ -11,7 +11,8 @@ MIN_RUN_WORDS = 5
 PROSE_EXT = ('.md', '.mdx', '.txt')
 TEMPLATE_EXT = ('.blade.php', '.html', '.htm', '.vue', '.svelte', '.astro', '.twig')
 LANG_PATH = re.compile(r'/(lang|content)/.+\.(php|json)$')
-SKIP_PATH = re.compile(r'/\.claude/|/\.ai/|/node_modules/|/vendor/|/SKILL\.md$|/CLAUDE\.md$|/AGENTS\.md$')
+SKIP_PATH = re.compile(r'/\.claude/|/\.ai/|/node_modules/|/vendor/|/SKILL\.md$|/CLAUDE\.md$|/AGENTS\.md$'
+                       r'|^/(private/)?tmp/|/scratchpad/|/\.panels/|/projects/[^/]+/memory/')
 CONFIG_DIR = os.environ.get('CLAUDE_CONFIG_DIR', '').rstrip('/')
 
 INLINE = r'a|abbr|b|br|cite|code|em|i|kbd|mark|q|s|small|span|strong|sub|sup|u|wbr'
@@ -140,10 +141,9 @@ def main():
     if written >= MIN_WORDS or in_templates >= MIN_TEMPLATE_WORDS:
         print(json.dumps({
             'decision': 'block',
-            'reason': f'You wrote {written + in_templates} words of copy this turn ({", ".join(targets)}). '
-                      'Call the Skill tool with "copywriter" and run its sharpen mode on that copy before you finish. '
-                      'Use self-check mode for your own copy. For a user draft with an approved diagnosis, '
-                      'verify that diagnosis and its eval without asking for approval again.',
+            'reason': f'{written + in_templates} words of new copy in '
+                      f'{", ".join(os.path.basename(target) for target in targets)}. '
+                      'Run the copywriter skill on it before you finish.',
         }))
 
 
