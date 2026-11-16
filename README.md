@@ -18,6 +18,7 @@ Rules enter context when loaded; skill names and descriptions enter discovery co
 
 - **[`projects.md`](rules/projects.md)**: where my projects live, so Claude checks those paths first when I name one.
 - **[`rtk.md`](rules/rtk.md)**: a hook rewrites shell commands through rtk; which output it condenses and how to bypass it.
+- **[`cloudflare.md`](rules/cloudflare.md)**: the `cf` CLI for domains, DNS and zone settings, and its search for finding a command.
 - **[`orchestration.md`](rules/orchestration.md)**: which tier parallel work runs at (inline, subagents, an agent team, Workflow, Solo), how sessions talk to each other, who commits and who pushes, and that whoever delegates collects.
 - **[`second-opinions.md`](rules/second-opinions.md)**: when to ask a persona, a peer project, a [Parley](https://github.com/mischasigtermans/claude-parley) gathering or a panel of agents unprompted, and the gates every review question carries.
 - **[`ui.md`](rules/ui.md)**: the bar every UI change meets without being asked. Mobile-first, dark variants, Flux controls, design guidelines for anything new, and what a page has to show before I look.
