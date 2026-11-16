@@ -3,7 +3,7 @@
 input=$(cat)
 account=$(echo "$input" | ~/.local/bin/clauset statusline 2>/dev/null)
 git_info=$(echo "$input" | bash ~/.claude/statusline-command.sh)
-context_pct=$(echo "$input" | npx ccstatusline 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g; s/ //g; s/%//')
+context_pct=$(echo "$input" | /opt/homebrew/bin/ccstatusline 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g; s/ //g; s/%//')
 pct_num=${context_pct%%.*}
 
 if [[ $pct_num =~ ^[0-9]+$ ]] && (( pct_num >= 80 )); then

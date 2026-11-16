@@ -104,7 +104,7 @@ A rule drops in with a one-liner:
 curl -fsSL https://raw.githubusercontent.com/mischasigtermans/dotclaude/main/rules/orchestration.md -o ~/.claude/rules/orchestration.md
 ```
 
-A hook needs its file and its entry in `settings.json`; sharpen's comes with its folder. The status line needs `npx ccstatusline` set to show the context-percentage widget alone, since the wrapper reads its whole output as one number, and clauset for the account name.
+A hook needs its file and its entry in `settings.json`; sharpen's comes with its folder. The status line needs `ccstatusline` installed globally (`npm install -g ccstatusline`; the wrapper calls it by its Homebrew path) and set to show the context-percentage widget alone, since the wrapper reads its whole output as one number, and clauset for the account name.
 
 ## What stays out
 
