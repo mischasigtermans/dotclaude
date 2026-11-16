@@ -41,6 +41,7 @@ A miner sees a few sessions, so repetition is yours to see. Group the items by w
 
 - Grade what earlier retros landed (`retro.py ledger read --repo <root>`): did the friction come back in the sessions since?
 - Drop what the user rejected before, unless the evidence is newer than the rejection. Say so when one is back.
+- With the `library` plugin installed, search it for the same correction further back than the window: Claude Code prunes transcripts after 30 days, and Library keeps the user's prompts. Call `library_search` with `kind: messages`, `source: code`, `sender: human`, `before` set to the window's start, and `project` set to each of this retro's folders in turn, as a hit prints it (`~/Sites/app`). Library holds no tool results, so it shows whether a friction is older, never what it cost.
 
 ## 6. The bar
 
