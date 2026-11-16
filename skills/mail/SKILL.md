@@ -13,6 +13,10 @@ The macuse Apple Mail tools (`mail_reply_message`, `mail_compose_message`, `mail
 - Put anything with accents, figures, quotes or real formatting into an attachment you generate yourself (PDF via HTML + headless Chrome, or DOCX), where you control the encoding. Check the rendered file before you attach it.
 - If a character won't render cleanly in the body, move that text into the attachment.
 
+## Before the draft
+
+Write the body and any attachment text first, then call the Skill tool with `copywriter` and run its sharpen mode in self-check over them. Fix every hit before a compose tool is called: a draft in Mail is already past the copy gate, which only sees files. A mail the user wrote or dictated word for word gets the diagnosis instead, never a silent rewrite.
+
 ## Sending
 
 - Create every mail as a draft first; never use `send_immediately`. Read the draft back with `mail_get_messages` and check the sender address, the recipients and every attachment by filename and size. The compose tool has no From parameter, so the account name doesn't guarantee the sender, and attachments can drop or double.

@@ -24,7 +24,7 @@ When the sharpen-gate Stop hook sends you here, or you're about to hand over cop
 3. Check the result against `eval.md`.
 4. Report in one or two lines what changed, with the file. No diagnosis table, no approval question.
 
-Text the user wrote or pasted never goes through self-check mode. That's the default above.
+Text the user wrote or pasted never goes through self-check mode. That's the default above. One case sits in between: the hook fires after you applied a diagnosis the user approved. Then verify that edit against the diagnosis and `eval.md`, and don't ask for approval again.
 
 ## Load
 
