@@ -18,7 +18,7 @@
     "allow": [],
     "defaultMode": "auto"
   },
-  "model": "opus",
+  "model": "fable",
   "hooks": {
     "PreToolUse": [
       {
@@ -129,7 +129,6 @@
     "padding": 0
   },
   "enabledPlugins": {
-    "frontend-design@claude-plugins-official": false,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "swift-lsp@claude-plugins-official": true,
     "personas@by-mischa": true,
@@ -139,11 +138,8 @@
     "david-tolnay@by-mischa": true,
     "ralph@by-mischa": true,
     "security-guidance@claude-plugins-official": true,
-    "stripe@claude-plugins-official": false,
     "claude-security@claude-plugins-official": true,
     "library@by-mischa": true,
-    "shopify-ai-toolkit@claude-plugins-official": false,
-    "turbopuffer@turbopuffer-skills": false,
     "firecrawl@claude-plugins-official": true,
     "laravel-cloud@laravel": true,
     "laravel@laravel": true,
@@ -208,7 +204,7 @@
       "effortLevel": "high"
     },
     "claude-fable-5-2": {
-      "effortLevel": "xhigh"
+      "effortLevel": "medium"
     }
   },
   "advisorModel": "fable",
