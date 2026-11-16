@@ -19,27 +19,31 @@ Rules enter context when loaded; skill names and descriptions enter discovery co
 - **[`projects.md`](rules/projects.md)**: where my projects live, so Claude checks those paths first when I name one.
 - **[`rtk.md`](rules/rtk.md)**: a hook rewrites shell commands through rtk; which output it condenses and how to bypass it.
 - **[`cloudflare.md`](rules/cloudflare.md)**: the `cf` CLI for domains, DNS and zone settings, and its search for finding a command.
-- **[`orchestration.md`](rules/orchestration.md)**: which tier parallel work runs at (inline, subagents, an agent team, Workflow, Solo), how sessions talk to each other, who commits and who pushes, and that whoever delegates collects.
+- **[`orchestration.md`](rules/orchestration.md)**: which tier parallel work runs at (inline, subagents, an agent team, Workflow, Solo), how sessions talk to each other, where durable work lives, who commits and who pushes, and that whoever delegates collects.
 - **[`second-opinions.md`](rules/second-opinions.md)**: when to ask a persona, a peer project, a [Parley](https://github.com/mischasigtermans/claude-parley) gathering or a panel of agents unprompted, and the gates every review question carries.
 - **[`ui.md`](rules/ui.md)**: the bar every UI change meets without being asked. Mobile-first, dark variants, Flux controls, design guidelines for anything new, and what a page has to show before I look.
 - **[`laravel.md`](rules/laravel.md)**: Pint on the Laravel preset, never `--dirty` or `--blade`, Flux Pro activation, what to leave unchecked at `boost:install`, and the Herd and Laravel Cloud traps I've hit. Loads on any PHP file, so a new project needs no setup.
 
 ## Skills
 
-Fourteen skills, each a folder in `skills/` with a `SKILL.md`. Claude loads one when the ask matches its description, or when I type its name.
+Eighteen skills, each a folder in `skills/` with a `SKILL.md`. Claude loads one when the ask matches its description, or when I type its name.
 
 | Skill | What it does |
 | --- | --- |
-| [finish](skills/finish/SKILL.md) | Takes a finished change through one round before its commit: simplify, review twice, docs, format, tests, a look at the UI, a report |
+| [finish](skills/finish/SKILL.md) | Takes a finished change through one round before its commit: simplify, review twice, a lesson, docs, copy, format, tests, a look at the UI, a report |
 | [handoff](skills/handoff/SKILL.md) | Writes a briefing for a fresh session and the one-line prompt that points at it |
+| [retro](skills/retro/SKILL.md) | Reads a repo's past sessions for what keeps costing agents effort or mistakes, and proposes the few fixes worth making: removal first, a check before prose. Keeps a ledger of what I decided |
+| [diagnose](skills/diagnose/SKILL.md) | Finds the cause of a failure before any fix: reproduce, trace back, no change until the chain closes, then the failing test first |
+| [wtf](skills/wtf/SKILL.md) | Explains the last message, a file or a passage in plain language, when I type `/wtf` |
 | [sync-docs](skills/sync-docs/SKILL.md) | Finds where the docs, guidelines and copy have drifted from the code, with `file:line` evidence, and fixes on my word |
 | [repo-docs](skills/repo-docs/SKILL.md) | My standard for READMEs, changelogs, commit messages, versions and `.github` files |
 | [copywriter](skills/copywriter/SKILL.md) | Writes a product page from facts in Apple's style, and sharpens any draft: names each AI pattern, quotes the line and gives the fix, then rewrites on my word. On Claude's own copy it fixes without asking |
-| [mail](skills/mail/SKILL.md) | Drafts, replies and forwards in Apple Mail: a plain body, anything with accents or formatting as an attachment, and a check of the draft before it goes |
+| [mail](skills/mail/SKILL.md) | Drafts, replies and forwards in Apple Mail: the copy check before the draft, a plain body, anything with accents or formatting as an attachment, and a check of the draft before it goes |
 | [ui](skills/ui/SKILL.md) | Craft for surfaces, typography and feel, which library to pick, and how to review an interface |
 | [motion](skills/motion/SKILL.md) | Names an effect, finds what should animate, reviews animation code and plans motion work |
 | [design-pack](skills/design-pack/SKILL.md) | Fetches the ui.sh design guidelines through its MCP server and says how to work with them |
 | [solo](skills/solo/SKILL.md) | Operates Solo: long-running processes, scratchpads and todos, workers, locks and timers |
+| [lead](skills/lead/SKILL.md) | Takes a batch of prepped issues through Solo workers: one interview, a role file, a brief per lane, a pilot before the waves, then the review, gate and commit of what each hands back |
 | [panel](skills/panel/SKILL.md) | Runs independent reviewers on Claude, Codex or Grok who cross-examine each other and sign one report |
 | [security-audit](skills/security-audit/SKILL.md) | Answers a security question or reviews a finding from source, and on an explicit ask runs a six-phase audit that ends in a validated report |
 | [laravel-forge](skills/laravel-forge/SKILL.md) | Deploys, logs, environment files and service commands through the Forge CLI |
@@ -51,32 +55,43 @@ To take one, copy its folder into your own `~/.claude/skills/`, or let the [skil
 npx skills add mischasigtermans/dotclaude --skill copywriter
 ```
 
-A skill brings no tools of its own. solo and panel need [Solo](https://soloterm.com), laravel-forge the `forge` CLI, cloud-database the `cloud` CLI and `mysql`, mail the macuse Apple Mail connector, security-audit Node for its two validators, and design-pack a [ui.sh](https://ui.sh) account with its MCP server connected. finish uses the `laravel@laravel` plugin for its simplify step, and Personas with Parley for its review.
+A skill brings no tools of its own. solo, lead and panel need [Solo](https://soloterm.com), laravel-forge the `forge` CLI, cloud-database the `cloud` CLI and `mysql`, mail the macuse Apple Mail connector, security-audit Node for its two validators, retro Python 3 for its session reader, and design-pack a [ui.sh](https://ui.sh) account with its MCP server connected. finish uses the `laravel@laravel` plugin for its simplify step, and Personas with Parley for its review.
 
-copywriter carries its own Stop hook, [`sharpen-gate.py`](skills/copywriter/hooks/sharpen-gate.py): once Claude wrote 150 or more words of prose to `.md`, `.mdx` or `.txt` files in a turn, or 50 or more words a visitor reads in a template or in a `lang` or `content` file, that copy goes through the skill's sharpen mode before the turn ends. Claude Code loads the folder as the plugin `copywriter@skills-dir`, and the skill keeps its plain name.
+copywriter carries its own Stop hook, [`sharpen-gate.py`](skills/copywriter/hooks/sharpen-gate.py): once Claude wrote 150 or more words of prose to `.md`, `.mdx` or `.txt` files in a turn, or 50 or more words a visitor reads in a template or in a `lang` or `content` file, that copy goes through the skill's sharpen mode before the turn ends. Scratch files, memory notes and panel run folders don't count. Claude Code loads the folder as the plugin `copywriter@skills-dir`, and the skill keeps its plain name.
 
 copywriter and mail don't need Claude Code. Claude Desktop takes them as uploaded skills; for copywriter, zip the folder without `.claude-plugin` and `hooks`, which are Claude Code's.
 
-On my machine `skills/` also holds what tools put there: clauset's two skills, the one from Rex, and the skills Claude syncs from claude.ai. Those stay out of the repo.
+On my machine `skills/` also holds what tools put there: clauset's two skills, the ones from Rex and Aside, and the skills Claude syncs from claude.ai. Those stay out of the repo.
+
+### Through a piece of work
+
+- Multi-step work starts in plan mode. An architecture fork goes to a Parley gathering first.
+- A failure with an unknown cause, or a fix that didn't hold: `diagnose`.
+- A batch of prepped issues, from an audit, a panel or a backlog: `lead`.
+- A finished change: `finish`. After the review it asks what the work taught, and lands the lesson in the cheapest form that stops a repeat: a test or a hook before a scoped rule, an always-loaded line last.
+- Commit and push: on my word.
+- Context filling up: `handoff`.
+- Every week or two per active repo, or when the same gotcha keeps coming back: `retro`.
+- Lost in a long answer: `/wtf`.
 
 ## Hooks
 
 | Hook | Event | What it does |
 | --- | --- | --- |
 | `rtk hook claude` | PreToolUse Bash | [rtk](https://github.com/rtk-ai/rtk)'s built-in hook: rewrites commands through rtk for smaller output |
-| [`bash-guard.py`](hooks/bash-guard.py) | PreToolUse Bash | Denies `git add -A`/`.`, `commit -a`, commit trailers, `--no-verify`, a `core.hooksPath` override, any `git tag` that writes, `pint --dirty` and `--blade`, `pkill` or `killall` on a test runner, `herd secure` |
+| [`bash-guard.py`](hooks/bash-guard.py) | PreToolUse Bash | Denies `git add -A`/`.` unless it's a dry run, `commit -a`, commit trailers, `--no-verify`, a `core.hooksPath` override, any `git tag` that writes, `pint --dirty` and `--blade`, `pkill` or `killall` on a test runner, `herd secure` |
 | [`config-protect.py`](hooks/config-protect.py) | PreToolUse Edit/Write | Denies edits to Pint, PHPStan, Prettier and ESLint config: fix the code, not the linter |
 | [`ui-gate.py`](hooks/ui-gate.py) | PreToolUse Edit/Write | Sends `rules/ui.md` with the first UI edit when no UI file was read (the path rule didn't load) |
 | [`memory-gate.py`](hooks/memory-gate.py) | PreToolUse Edit/Write | Denies feedback memories (a rule belongs in the repo's guideline, or here when it's how I work everywhere) and status in project memories |
 | [`scope-gate.py`](hooks/scope-gate.py) | PreToolUse Edit/Write | Reminds edits to the setup and plugin skills to check scope, once per home session or per distinct edit from a project. Retrying passes; it does not validate the text. Local tool-managed skills are excluded |
 | [`php-format.py`](hooks/php-format.py) | PostToolUse, Stop | Notes edited PHP files (never Blade); at Stop runs Pint on them and PHPStan, blocks on errors |
-| [`dash-lint.py`](hooks/dash-lint.py) | PostToolUse Edit/Write | Flags em dashes, en dashes and middle dots in copy |
+| [`dash-lint.py`](hooks/dash-lint.py) | PostToolUse Edit/Write | Flags em dashes, en dashes and middle dots in copy. Panel run folders hold other agents' text and are left alone |
 
-`bash hooks/tests/run.sh` pipes fake payloads through every hook, copywriter's gate included, and asserts on the output. All hooks fail open: an internal error never blocks a tool call.
+`bash hooks/tests/run.sh` pipes fake payloads through every hook, copywriter's gate included, and asserts on the output. A hook that exits non-zero fails its check, so a moved script can't pass as silence. All hooks fail open: an internal error never blocks a tool call.
 
 ## Evals
 
-`evals/` tests the instructions the way a suite tests code. Each of its 15 scenarios hands a fresh Claude session a small repo and a request, then grades what it did: which files a commit holds, whether a comment was added, whether a number came out as 17.000.
+`evals/` tests the instructions the way a suite tests code. Each of its 16 scenarios hands a fresh Claude session a small repo and a request, then grades what it did: which files a commit holds, whether a comment was added, whether a number came out as 17.000.
 
 ```bash
 python3 evals/run.py probe
@@ -130,6 +145,7 @@ Public instructions hold reusable preferences and methods. Project decisions bel
 - The rules in CLAUDE.md on changes that trace to the request, the minimum implementation and a check for every step come from [Andrej Karpathy's notes on LLM coding](https://x.com/karpathy/status/2015883857489522876), via [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills).
 - The hook set and its tests take their shape from [affaan-m/ECC](https://github.com/affaan-m/ECC).
 - copywriter's sharpen mode started from [Peter Yang](https://github.com/petergyang)'s [no-ai-slop](https://github.com/petergyang/no-ai-slop). Its write mode builds on two analyses of Apple's product pages, by Enchanting Marketing and Widewail, and on the honesty rules in [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills). ui and motion started from the skills [Emil Kowalski](https://github.com/emilkowalski) and [Jakub Krehel](https://github.com/jakubkrehel) published. The text and the examples here are written new.
+- retro, diagnose, wtf and the lesson step in finish take their method from the compound, retro, debug and wtf skills in [Every](https://every.to)'s [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) plugin (MIT). wtf follows theirs closely; the rest is written new.
 
 ## License
 

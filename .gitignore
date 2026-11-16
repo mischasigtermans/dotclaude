@@ -32,6 +32,7 @@ skills/synced/
 skills/accounts/
 skills/clauset/
 skills/rex/
+skills/aside-browser/
 
 # Allow hooks (recursively)
 !hooks/
