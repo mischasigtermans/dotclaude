@@ -146,19 +146,19 @@ stop_payload() { jq -cn --argjson a "${1:-false}" '{session_id:"test",transcript
 words() { python3 -c "print(' '.join(['word']*$1))"; }
 readme() { jq -cn --arg t "$(words "$1")" '{type:"tool_use",name:"Write",input:{file_path:"/p/README.md",content:$t}}'; }
 edit() { jq -cn --arg o "$(words "$1")" --arg n "$(words "$2")" '{type:"tool_use",name:"Edit",input:{file_path:"/p/README.md",old_string:$o,new_string:$n}}'; }
-SHARPEN='{"type":"tool_use","name":"Skill","input":{"skill":"sharpen"}}'
+SHARPEN='{"type":"tool_use","name":"Skill","input":{"skill":"copywriter"}}'
 NEXT='{"type":"user","message":{"content":"apply it"}}'
 META='{"type":"user","isMeta":true,"message":{"content":"[Image: original 390x2600]"}}'
 
-SG="python3 $HOOKS/../skills/sharpen/hooks/sharpen-gate.py"
+SG="python3 $HOOKS/../skills/copywriter/hooks/sharpen-gate.py"
 transcript "$(readme 200)"
 check "sharpen: long README"        "$SG" "$(stop_payload)" '"block"'
 check "sharpen: already active"     "$SG" "$(stop_payload true)" silent
-transcript "$(readme 200)" '{"type":"tool_use","name":"Skill","input":{"skill":"sharpen"}}'
+transcript "$(readme 200)" "$SHARPEN"
 check "sharpen: ran already"        "$SG" "$(stop_payload)" silent
 transcript "$(readme 200)" '{"type":"tool_use","name":"Skill","input":{"skill":"sharpen"}}'
-check "sharpen: ran by its plain name"     "$SG" "$(stop_payload)" silent
-transcript "$(readme 200)" '{"type":"tool_use","name":"Skill","input":{"skill":"anthropic-skills:sharpen"}}'
+check "sharpen: ran under its old name"    "$SG" "$(stop_payload)" silent
+transcript "$(readme 200)" '{"type":"tool_use","name":"Skill","input":{"skill":"anthropic-skills:copywriter"}}'
 check "sharpen: ran via claude.ai"  "$SG" "$(stop_payload)" silent
 transcript "$(readme 60)"
 check "sharpen: short"              "$SG" "$(stop_payload)" silent
@@ -201,6 +201,16 @@ check "sharpen: a Write over an existing file counts its changed words" "$SG" "$
 transcript "$(jq -cn --arg t "$(words 200)" '{type:"tool_use",id:"w2",name:"Write",input:{file_path:"/p/NEW.md",content:$t}}')" \
   "$(jq -cn '{type:"user",message:{content:[{type:"tool_result",tool_use_id:"w2",content:"ok"}]},toolUseResult:{type:"create",filePath:"/p/NEW.md",originalFile:null}}')"
 check "sharpen: a Write of a new file counts every word" "$SG" "$(stop_payload)" '"block"'
+
+template() { jq -cn --arg p "$1" --arg t "$2" '{type:"tool_use",name:"Write",input:{file_path:$p,content:$t}}'; }
+transcript "$(template /p/resources/views/a.blade.php "<section><p>$(words 60)</p></section>")"
+check "sharpen: a template with a paragraph" "$SG" "$(stop_payload)" '"block"'
+transcript "$(template /p/resources/views/a.blade.php "$(python3 -c "print('<li>word word</li>'*40)")")"
+check "sharpen: a template of short labels" "$SG" "$(stop_payload)" silent
+transcript "$(template /p/lang/en/app.php "<?php return ['a' => '$(words 30)', 'b' => '$(words 30)'];")"
+check "sharpen: a lang file with sentences" "$SG" "$(stop_payload)" '"block"'
+transcript "$(template /p/resources/content/pages/home.json "{\"lede\": \"$(words 60)\"}")"
+check "sharpen: a content file with sentences" "$SG" "$(stop_payload)" '"block"'
 
 S="python3 $HOOKS/scope-gate.py"
 scope_payload() { jq -cn --arg s "$1" --arg d "$2" --arg p "$3" --arg t "$4" '{session_id:$s,transcript_path:("/c/projects/"+$d+"/s.jsonl"),tool_name:"Edit",tool_input:{file_path:$p,new_string:$t}}'; }

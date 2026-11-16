@@ -92,7 +92,7 @@ The models and effort levels are examples: pass the ones the user runs for each 
 
 ## 5. Rounds
 
-Every brief carries the ask in the user's words, the hard rules, the review gates verbatim, the output path, 'write as you go', and a fixed last line. Templates in `briefs.md`. Run `sharpen` in self-check mode on each brief before it goes out.
+Every brief carries the ask in the user's words, the hard rules, the review gates verbatim, the output path, 'write as you go', and a fixed last line. Templates in `briefs.md`. Run `copywriter` in self-check mode on each brief before it goes out.
 
 - **Round 1, independent.** Each reviewer alone. Nobody opens another's files until round 2 opens. Then lay the coverage tables side by side: round 1 samples, so a reviewer's silence about a file it didn't read says nothing about that file.
 - **Round 2, cross-examination.** Each reviewer tries to refute the others' findings. CONFIRMED only on its own re-check; a finding it can't trace in full is UNVERIFIABLE; a refutation cites a line, source or output it read, never an assumed defence. Plus severity, what it rests on, duplicates, and what all of them missed.

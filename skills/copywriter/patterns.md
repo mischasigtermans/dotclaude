@@ -2,6 +2,17 @@
 
 Name the pattern, quote the line, give the fix. Word-level rules come from the user's own instructions, which are active already, so this file leaves them out.
 
+## Headline exceptions on product pages
+
+Two patterns below are allowed in the headline of a product page, and only there. A headline is the short display line above a section; subheads and body copy get no exception.
+
+- **Fragments.** A headline may be a fragment or a short run of them: 'Mute the commute.', 'Your roster. Your rates. Your rider.' This overrides dramatic fragmentation.
+- **Paired opposites.** A headline may set two true facts about the product against each other: 'More range. Less weight.' Both halves must be claims the page proves. This overrides binary contrasts. A staged denial ('It's not X. It's Y.') knocks down a belief nobody held and stays out, headline or not.
+
+Outside product pages there are no exceptions.
+
+## The patterns
+
 **Binary contrasts.** 'This is not X. It's Y.', 'The question isn't X, it's Y.', 'It's not just X but Y.' Say Y and drop X. 'The problem isn't the price. It's the onboarding.' becomes 'Onboarding loses more customers than price does.'
 
 **Throat-clearing openers.** 'Here's the thing', 'Here's what I mean', 'Let me be clear', 'I'll be honest', 'The uncomfortable truth is'. Delete the opener and start with the point.

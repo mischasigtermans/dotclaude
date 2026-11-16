@@ -1,8 +1,3 @@
----
-name: sharpen
-description: "Diagnose and fix AI-slop in a draft while preserving the writer's voice. Names each pattern with the quoted line and a fix, then rewrites on your word. Triggers on 'sharpen this', 'make this less AI', 'does this read as AI', 'tighten this up', 'make it more direct', 'edit this draft', 'herschrijf dit strakker', 'maak dit minder AI', 'is dit goed geschreven', or any request to audit prose without rewriting it. Also runs in self-check mode on copy Claude wrote itself, when the sharpen-gate Stop hook asks for it."
----
-
 # Sharpen
 
 Edit like a sharp human editor. Keep the writer's point and voice, make the prose clearer and livelier, and take out the AI patterns. A distinctive draft stays distinctive after your edit; never sand it down into generic polish.
@@ -25,7 +20,7 @@ A request to detect or audit gets the named patterns and nothing more. No offer 
 When the sharpen-gate Stop hook sends you here, or you're about to hand over copy you wrote this turn, the draft is yours, not the writer's. There's no phrasing of theirs to protect and nobody to ask.
 
 1. Read what you wrote in full.
-2. Run `patterns.md` over it and fix every hit in place.
+2. Run `patterns.md` over it and fix every hit in place. On a product page, the two headline exceptions at the top of `patterns.md` hold: leave a headline fragment or a pair of true opposites alone.
 3. Check the result against `eval.md`.
 4. Report in one or two lines what changed, with the file. No diagnosis table, no approval question.
 
@@ -38,8 +33,21 @@ Text the user wrote or pasted never goes through self-check mode. That's the def
 | Naming what's wrong | `patterns.md` |
 | Deciding how much to cut | `principles.md` |
 | Checking your own output before returning it | `eval.md` |
+| A product page: the page check | `write.md` |
 
-Word-level rules (banned vocabulary, punctuation, number format, quote style) live in the user's own instructions (`CLAUDE.md`, or custom instructions on claude.ai) and are already active. Don't restate them.
+## Product pages: add the page check
+
+When the draft is a product page or a section of one, run the line pass as usual, then add rows to the same diagnosis table for what the patterns don't cover. The rules behind each row are in `write.md`.
+
+| Finding | Test |
+| --- | --- |
+| Two ideas in one panel | The headline needs 'and' |
+| Empty headline | Strip the wordplay and no claim remains, or a competitor could run it unchanged |
+| Unproven claim | No number, mechanism or footnote under it |
+| Buried lead | The biggest message isn't at the top |
+| Skimmer fail | Headlines and subheads alone don't tell the story |
+
+Keep the minimum-edit rule. Propose new panels or a new order only when the page check found a structural problem, and give the reason in 'What changed'. A full rebuild is write mode, and the user asks for that.
 
 ## Pasted draft or file on disk
 
@@ -48,6 +56,10 @@ You judge both the same way. What you hand back differs.
 **Pasted into the conversation.** Return the full edited draft in your reply. That's the only copy they have.
 
 **A file path.** Edit the file in place, then show what changed as a table of before and after. Never paste a long file back into the conversation; it buries the edit in noise. Say which file you touched.
+
+**A template (`.blade.php`, `.vue`, `.html`).** The copy is the text a visitor reads: text nodes, the props a component renders as text (`title`, `lead`, `eyebrow`, `label`), and `alt`, `placeholder` and `aria-label` values. Judge only that. Copy also lives in content files (`resources/content/*.php`): search the project for the same claim before you finish, and name every other place that still says it the old way. Edit the text in place and leave tags, classes, directives and expressions exactly as they are. When the copy sits in a translation call (`__('...')`, `@lang`), edit the string in its lang file, in every language the project ships, and rebuild wordplay per language. Report as a before and after table of the copy lines, without the markup.
+
+**A point edit.** Return only the changed lines, each with a one-line reason.
 
 ## What to ask for
 
