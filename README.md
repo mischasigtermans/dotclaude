@@ -26,7 +26,7 @@ Rules enter context when loaded; skill names and descriptions enter discovery co
 
 ## Skills
 
-Thirteen skills, each a folder in `skills/` with a `SKILL.md`. Claude loads one when the ask matches its description, or when I type its name.
+Fourteen skills, each a folder in `skills/` with a `SKILL.md`. Claude loads one when the ask matches its description, or when I type its name.
 
 | Skill | What it does |
 | --- | --- |
@@ -41,6 +41,7 @@ Thirteen skills, each a folder in `skills/` with a `SKILL.md`. Claude loads one 
 | [design-pack](skills/design-pack/SKILL.md) | Fetches the ui.sh design guidelines through its MCP server and says how to work with them |
 | [solo](skills/solo/SKILL.md) | Operates Solo: long-running processes, scratchpads and todos, workers, locks and timers |
 | [panel](skills/panel/SKILL.md) | Runs independent reviewers on Claude, Codex or Grok who cross-examine each other and sign one report |
+| [security-audit](skills/security-audit/SKILL.md) | Answers a security question or reviews a finding from source, and on an explicit ask runs a six-phase audit that ends in a validated report |
 | [laravel-forge](skills/laravel-forge/SKILL.md) | Deploys, logs, environment files and service commands through the Forge CLI |
 | [cloud-database](skills/cloud-database/SKILL.md) | Copies a Laravel Cloud database between environments and guards against its two traps: the wrong direction, and orphan tables that break the next migrate |
 
@@ -50,7 +51,7 @@ To take one, copy its folder into your own `~/.claude/skills/`, or let the [skil
 npx skills add mischasigtermans/dotclaude --skill sharpen
 ```
 
-A skill brings no tools of its own. solo and panel need [Solo](https://soloterm.com), laravel-forge the `forge` CLI, cloud-database the `cloud` CLI and `mysql`, mail the macuse Apple Mail connector, and design-pack a [ui.sh](https://ui.sh) account with its MCP server connected. finish uses the `laravel@laravel` plugin for its simplify step, and Personas with Parley for its review.
+A skill brings no tools of its own. solo and panel need [Solo](https://soloterm.com), laravel-forge the `forge` CLI, cloud-database the `cloud` CLI and `mysql`, mail the macuse Apple Mail connector, security-audit Node for its two validators, and design-pack a [ui.sh](https://ui.sh) account with its MCP server connected. finish uses the `laravel@laravel` plugin for its simplify step, and Personas with Parley for its review.
 
 sharpen carries its own Stop hook, [`sharpen-gate.py`](skills/sharpen/hooks/sharpen-gate.py): once Claude wrote 150 or more words of prose to `.md`, `.mdx` or `.txt` files in a turn, it goes through the skill before the turn ends. Claude Code loads the folder as the plugin `sharpen@skills-dir`, and the skill keeps its plain name.
 
