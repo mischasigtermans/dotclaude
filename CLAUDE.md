@@ -60,6 +60,8 @@ When I correct you, update the existing instruction at the narrowest reusable sc
 - Reusable procedures: a skill in `~/.claude/skills`.
 - Project memory: durable facts the code cannot tell you. Current status belongs in the work tracker.
 
+Before writing prose, try a form that costs no context: a test, lint rule or hook that fails on the mistake, then a rule scoped to the files it concerns. An always-loaded line comes last.
+
 Project details and routing stay in the project's own instructions or private configuration. Public examples stay neutral. Before promoting a correction, check that it holds outside the original incident, merge it with the existing rule, and remove duplication. Respect a read-only request even when I correct you.
 
 ## Communication

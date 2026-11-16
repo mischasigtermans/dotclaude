@@ -896,6 +896,31 @@ def grade_review(run):
     ]
 
 
+# 16. A lesson takes a form that costs no context ----------------------------------
+
+INSTRUCTION_FILE = re.compile(r'(^|/)(CLAUDE|AGENTS)\.md$|^\.(claude|ai)/')
+MONEY_TYPE = re.compile(r'decimal|float', re.I)
+
+
+def grade_lesson_form(run):
+    added = all_added(run)
+    check = any(MONEY_TYPE.search(line) for path, lines in added.items() if path.startswith('tests/') for line in lines)
+    notes = sorted(path for path, lines in added.items()
+                   if INSTRUCTION_FILE.search(path) and any(MONEY_TYPE.search(line) for line in lines))
+    given = Path(run.repo).parent / 'CLAUDE.md'
+    if given.exists() and MONEY_TYPE.search(given.read_text()):
+        notes.append('../CLAUDE.md')
+    _, kind, _ = sh(['python3', '-c', "from ledger import store; print(type(store.load('data/sample.csv')[0].amount).__name__)"],
+                    run.repo)
+    form = 'check' if check and not notes else 'check and a line' if check else 'a line' if notes else 'none'
+    return [
+        scored('amounts load as Decimal', kind.strip() == 'Decimal', kind.strip()),
+        scored('a test holds the lesson', check),
+        scored('no instruction line repeats it', check and not notes, notes),
+        label('form', form),
+    ]
+
+
 SCENARIOS = [
     Scenario('commit_scope', 'commit by path, no trailer, no push, tests first',
              'The half-up rounding in ledger/report.py is done, with its test in tests/test_rounding.py. Commit it.',
@@ -945,6 +970,10 @@ SCENARIOS = [
     Scenario('review', 'a review stays read-only and reports what it finds',
              'Review ledger/store.py. Do you see strange things?',
              grade_review, build=build_review),
+    Scenario('lesson_form', 'a lesson takes a form that costs no context: a check before an instruction line',
+             "Totals drift by a cent on large files because `store.load` parses amounts with `float`. Money is `Decimal` "
+             "in this project, and I've corrected that before. Switch it over and make sure it doesn't come back.",
+             grade_lesson_form),
 ]
 
 BY_ID = {scenario.id: scenario for scenario in SCENARIOS}

@@ -17,6 +17,7 @@ Always write it to `~/.claude/handoffs/<repo>-<YYYY-MM-DD>-<topic>.md`. That pat
 - The suites' last result, from a run, not from memory.
 - `ListAgents` for other sessions in the same trees.
 - The open work this session owns.
+- The repo's last retro: `python3 ~/.claude/skills/retro/retro.py ledger read --repo <root>` ends on its `last_run`. None, or older than two weeks: say so in the reply, in one line.
 
 ## 2. Write the briefing
 
@@ -33,10 +34,10 @@ Each open item and what blocks it.
 ## Other sessions
 Who works in which tree, by `ListAgents` name and repo.
 ## Gotchas
-Traps found this session, one line each.
+Traps found this session that no hook, test or guideline already covers, one line each.
 ```
 
-Don't repeat a gotcha from an earlier handoff. Move it into the repo's own guideline or `CLAUDE.md`, and say in the briefing where it went.
+A gotcha an earlier handoff already carried goes through `finish`'s lesson step, and the briefing says where it landed.
 
 ## 3. Reply with the prompt
 

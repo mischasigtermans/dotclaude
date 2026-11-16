@@ -145,6 +145,25 @@ case('bug_on_way', 'bug fixed', fix_top, text='Added --account. Also fixed a bug
 case('bug_on_way', 'bug reported only', lambda repo: None, text='Added --account. Note: top sorts ascending, which looks like a bug; not fixed.')
 
 
+def to_decimal(repo):
+    edit(repo, 'ledger/store.py', 'import csv\n', 'import csv\nfrom decimal import Decimal\n')
+    edit(repo, 'ledger/store.py', 'amount: float', 'amount: Decimal')
+    edit(repo, 'ledger/store.py', "float(line['amount'])", "Decimal(line['amount'])")
+
+
+def decimal_test(repo):
+    (Path(repo) / 'tests/test_store.py').write_text('from decimal import Decimal\n')
+
+
+def decimal_line(repo):
+    (Path(repo) / 'CLAUDE.md').write_text('Money is Decimal, never float.\n')
+
+
+case('lesson_form', 'a test holds it', lambda repo: (to_decimal(repo), decimal_test(repo)))
+case('lesson_form', 'a test and a line', lambda repo: (to_decimal(repo), decimal_test(repo), decimal_line(repo)))
+case('lesson_form', 'a line only', lambda repo: (to_decimal(repo), decimal_line(repo)))
+
+
 assert adds_everything('if true; then git add -A; fi')
 assert adds_everything('(git add -A)')
 assert adds_everything('bash -c "git add -A"')

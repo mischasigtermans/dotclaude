@@ -1,0 +1,14 @@
+{"type":"user","timestamp":"2026-11-10T09:00:00.000Z","origin":{"kind":"human"},"promptSource":"typed","message":{"content":"Rename the export job <system-reminder>never shown</system-reminder>"}}
+{"type":"assistant","timestamp":"2026-11-10T09:00:05.000Z","message":{"content":[{"type":"tool_use","id":"t1","name":"Bash","input":{"command":"git add -A"}}]}}
+{"type":"user","timestamp":"2026-11-10T09:00:06.000Z","message":{"content":[{"type":"tool_result","tool_use_id":"t1","is_error":true,"content":"PreToolUse:Bash hook error: Stage by pathspec. Never git add -A."}]}}
+{"type":"assistant","timestamp":"2026-11-10T09:01:00.000Z","message":{"content":[{"type":"tool_use","id":"t2","name":"Bash","input":{"command":"vendor/bin/pest tests/ExportTest.php"}}]}}
+{"type":"user","timestamp":"2026-11-10T09:01:30.000Z","message":{"content":[{"type":"tool_result","tool_use_id":"t2","is_error":true,"content":[{"type":"text","text":"Exit code 1\nFAILED Tests\\ExportTest"}]}]}}
+{"type":"assistant","timestamp":"2026-11-10T09:02:00.000Z","message":{"content":[{"type":"tool_use","id":"t3","name":"Read","input":{"file_path":"/p/app/Export.php"}}]}}
+{"type":"user","timestamp":"2026-11-10T09:02:01.000Z","message":{"content":[{"type":"tool_result","tool_use_id":"t3","content":"<?php // a file that mentions an error and a hook"}]}}
+{"type":"assistant","timestamp":"2026-11-10T09:02:30.000Z","message":{"content":[{"type":"tool_use","id":"t4","name":"Grep","input":{"pattern":"ExportJob"}}]}}
+{"type":"attachment","timestamp":"2026-11-10T09:03:00.000Z","attachment":{"type":"hook_blocking_error","hookName":"Stop","hookEvent":"Stop","blockingError":{"blockingError":"You wrote 200 words of copy this turn.","command":"python3 gate.py"}}}
+{"type":"attachment","timestamp":"2026-11-10T09:03:10.000Z","attachment":{"type":"hook_non_blocking_error","hookName":"Stop","hookEvent":"Stop","stderr":"Hook script appears to be missing"}}
+{"type":"attachment","timestamp":"2026-11-10T09:03:20.000Z","attachment":{"type":"hook_success","hookName":"SessionStart","hookEvent":"SessionStart"}}
+{"type":"user","timestamp":"2026-11-10T09:04:00.000Z","message":{"content":[{"type":"text","text":"[Request interrupted by user for tool use]"}]}}
+{"type":"user","timestamp":"2026-11-10T09:04:30.000Z","isMeta":true,"origin":{"kind":"peer"},"promptSource":"system","message":{"content":"Another Claude session sent a message"}}
+{"type":"user","timestamp":"2026-11-10T09:05:00.000Z","origin":{"kind":"task-notification"},"promptSource":"system","message":{"content":"<task-notification><status>completed</status></task-notification>"}}
