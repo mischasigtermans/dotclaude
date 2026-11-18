@@ -3,6 +3,7 @@ import json
 import os
 import re
 import shlex
+import subprocess
 import sys
 
 TRAILER = re.compile(r'co-authored-by|signed-off-by', re.I)
@@ -13,6 +14,21 @@ RUNNERS = {'nice', 'timeout', 'xargs'}
 
 
 HEREDOC = re.compile(r'(?<!<)<<(?!<)-?\s*([\'"]?)([A-Za-z_]\w*)\1')
+WIP_FILES = ['*.md', '*.mdx', '*.txt', '*.blade.php', '*.html', ':(exclude)drafts/**', ':(exclude)**/drafts/**']
+
+
+def wip_markers(directory):
+    """`[WIP: ...]` gaps in the committed prose a push would ship. A draft is unfinished by
+    definition, and a marker in backticks documents the convention rather than marking a gap."""
+    found = subprocess.run(['git', '-C', directory, 'grep', '-n', '-I', '-F', '[WIP:', 'HEAD', '--', *WIP_FILES],
+                           capture_output=True, text=True, timeout=10).stdout
+    hits = []
+    for line in found.splitlines():
+        location, _, text = line.removeprefix('HEAD:').partition(':')
+        number, _, text = text.partition(':')
+        if '[WIP:' in re.sub(r'`[^`]*`', '', text):
+            hits.append(f'{location}:{number}')
+    return hits
 
 
 def without_heredocs(command):
@@ -117,7 +133,8 @@ def git_violation(args):
 
 
 def main():
-    command = json.load(sys.stdin).get('tool_input', {}).get('command', '')
+    event = json.load(sys.stdin)
+    command = event.get('tool_input', {}).get('command', '')
     reason = None
 
     if not reason:
@@ -129,6 +146,12 @@ def main():
                     message = command if '<<' in command else ' '.join(args)
                     if 'commit' in args and TRAILER.search(message):
                         reason = 'Commit messages carry no Co-Authored-By or other trailer.'
+                    if not reason and 'push' in args:
+                        directory = args[args.index('-C') + 1] if '-C' in args[:args.index('push')] else event.get('cwd') or os.getcwd()
+                        hits = wip_markers(directory)
+                        if hits:
+                            reason = (f'Not pushed: {len(hits)} [WIP: ...] gaps in committed files ({", ".join(hits[:5])}). '
+                                      'Fill or remove them first; drafts/ is exempt.')
                 elif name in ('pkill', 'killall') and TEST_RUNNER.search(' '.join(args)):
                     reason = ('Stop the run you started, by its PID. Never pkill or killall a test runner: '
                               'other sessions share this machine and their suites die with it.')

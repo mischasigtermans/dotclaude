@@ -83,13 +83,13 @@ On my machine `skills/` also holds what tools put there: clauset's two skills, t
 | Hook | Event | What it does |
 | --- | --- | --- |
 | `rtk hook claude` | PreToolUse Bash | [rtk](https://github.com/rtk-ai/rtk)'s built-in hook: rewrites commands through rtk for smaller output |
-| [`bash-guard.py`](hooks/bash-guard.py) | PreToolUse Bash | Denies `git add -A`/`.` unless it's a dry run, `commit -a`, commit trailers, `--no-verify`, a `core.hooksPath` override, any `git tag` that writes, `pint --dirty` and `--blade`, `pkill` or `killall` on a test runner, `herd secure` |
+| [`bash-guard.py`](hooks/bash-guard.py) | PreToolUse Bash | Denies `git add -A`/`.` unless it's a dry run, `commit -a`, commit trailers, `--no-verify`, a `core.hooksPath` override, any `git tag` that writes, `pint --dirty` and `--blade`, `pkill` or `killall` on a test runner, `herd secure`, and a `git push` while committed prose outside `drafts/` still holds a `[WIP: ...]` gap |
 | [`config-protect.py`](hooks/config-protect.py) | PreToolUse Edit/Write | Denies edits to Pint, PHPStan, Prettier and ESLint config: fix the code, not the linter |
 | [`ui-gate.py`](hooks/ui-gate.py) | PreToolUse Edit/Write | Sends `rules/ui.md` with the first UI edit when no UI file was read (the path rule didn't load) |
 | [`memory-gate.py`](hooks/memory-gate.py) | PreToolUse Edit/Write | Denies feedback memories (a rule belongs in the repo's guideline, or here when it's how I work everywhere) and status in project memories |
 | [`scope-gate.py`](hooks/scope-gate.py) | PreToolUse Edit/Write | Reminds edits to the setup and plugin skills to check scope, once per home session or per distinct edit from a project. Retrying passes; it does not validate the text. Local tool-managed skills are excluded |
 | [`php-format.py`](hooks/php-format.py) | PostToolUse, Stop | Notes edited PHP files (never Blade); at Stop runs Pint on them and PHPStan, blocks on errors |
-| [`dash-lint.py`](hooks/dash-lint.py) | PostToolUse Edit/Write | Flags em dashes, en dashes and middle dots in copy. Panel run folders hold other agents' text and are left alone |
+| [`dash-lint.py`](hooks/dash-lint.py) | PostToolUse Edit/Write | Flags em dashes, en dashes, middle dots and invisible characters (zero-width, soft hyphen, byte-order mark) in copy. Panel run folders hold other agents' text and are left alone |
 
 `bash hooks/tests/run.sh` pipes fake payloads through every hook, writing's gate included, and asserts on the output. A hook that exits non-zero fails its check, so a moved script can't pass as silence. All hooks fail open: an internal error never blocks a tool call.
 

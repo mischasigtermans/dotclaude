@@ -29,6 +29,21 @@ check "guard: add ."             "$G" "$(bash_payload 'cd x && git add . && git 
 check "guard: add pathspec"      "$G" "$(bash_payload 'git add app/Models/User.php')" silent
 check "guard: add -A as a dry run" "$G" "$(bash_payload 'git add -A --dry-run')" silent
 check "guard: add -n ."          "$G" "$(bash_payload 'git add -n .')" silent
+
+wip_repo() {
+  rm -rf "$TMP/wip" && mkdir -p "$TMP/wip/drafts" && git -C "$TMP/wip" init -q
+  printf '%s\n' "$1" > "$TMP/wip/$2"
+  git -C "$TMP/wip" add -A && git -C "$TMP/wip" -c user.name=t -c user.email=t@t commit -qm x
+}
+push_payload() { jq -cn --arg d "$TMP/wip" '{tool_name:"Bash",cwd:$d,tool_input:{command:"git push"}}'; }
+wip_repo 'Shipped [WIP: the number] text.' post.md
+check "guard: push with a WIP marker"       "$G" "$(push_payload)" 'WIP'
+wip_repo 'A draft [WIP: the number].' drafts/post.md
+check "guard: push with a WIP marker in a draft" "$G" "$(push_payload)" silent
+wip_repo 'Mark a gap as `[WIP: what is needed]`.' SKILL.md
+check "guard: push with a documented marker" "$G" "$(push_payload)" silent
+wip_repo 'Done text.' post.md
+check "guard: push without markers"          "$G" "$(push_payload)" silent
 check "guard: commit -am"        "$G" "$(bash_payload 'git commit -am "fix"')" '"deny"'
 check "guard: commit pathspec"   "$G" "$(bash_payload 'git commit -m "Fix login" -- app/Http')" silent
 check "guard: trailer"           "$G" "$(bash_payload $'git commit -m "Fix\n\nCo-Authored-By: Claude"')" 'trailer'
@@ -87,6 +102,7 @@ D="python3 $HOOKS/dash-lint.py"
 check "dash: blade em dash"      "$D" "$(file_payload /p/resources/views/a.blade.php $'<p>Fast — and cheap</p>')" '"block"'
 check "dash: md en dash"         "$D" "$(file_payload /p/README.md $'2019–2021')" '"block"'
 check "dash: clean md"           "$D" "$(file_payload /p/README.md 'Fast, and cheap.')" silent
+check "dash: invisible character" "$D" "$(file_payload /p/README.md $'Fast​ and cheap.')" 'invisible'
 check "dash: php code"           "$D" "$(file_payload /p/app/X.php $'// a — b')" silent
 check "dash: memory file"        "$D" "$(file_payload "$HOME/.claude/projects/x/memory/a.md" $'a — b')" silent
 # clauset gives each account a config dir whose projects/ links to ~/.claude/projects.
