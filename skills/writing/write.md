@@ -20,7 +20,7 @@ You need four things:
 3. **The proof inventory.** Specs, measured results, comparisons with the previous version or the status quo, materials, mechanisms, prices. Copy is built from this list, so write the list before any copy.
 4. **Page type and language.** Product page, launch page, feature page, comparison, or a single section.
 
-If the user wants a draft now, draft it and mark gaps as `[NEED: ...]`. Never fill a gap with an invented number.
+If the user wants a draft now, draft it and mark gaps as `[WIP: ...]`. Never fill a gap with an invented number.
 
 ## Step 1: Build the message stack
 
@@ -45,14 +45,14 @@ Hardware example (fictional headphones):
 - Headline: Mute the commute.
 - Subhead: Hush One cancels twice as much noise as the previous generation, so a full train sounds like an empty room.¹
 - Body: Six outward microphones measure the noise around you 48.000 times a second. The onboard chip plays the opposite wave before the sound reaches your ear.
-- Footnote: ¹ [NEED: test conditions, date, comparison model]
+- Footnote: ¹ [WIP: test conditions, date, comparison model]
 
 Software example (fictional booking platform):
 - Eyebrow: Contracts
 - Headline: Signed before soundcheck.
 - Subhead: An accepted offer becomes a signed contract in the same thread, with every term already filled in.
 - Body: Send the offer. The promoter accepts. The contract fills in from the booking data and goes out for signature. Agencies close a booking in 2 days instead of 9.²
-- Footnote: ² [NEED: source of the 2 vs 9 figure]
+- Footnote: ² [WIP: source of the 2 vs 9 figure]
 
 ## Step 3: The headline toolkit
 
@@ -151,7 +151,7 @@ Body
 Alternatives: 2 headlines, one-line rationale each
 ...
 FOOTNOTES
-OPEN [NEED] ITEMS
+OPEN [WIP] ITEMS
 ```
 
 ## Sources

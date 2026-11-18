@@ -153,11 +153,11 @@ stop_payload() { jq -cn --argjson a "${1:-false}" '{session_id:"test",transcript
 words() { python3 -c "print(' '.join(['word']*$1))"; }
 readme() { jq -cn --arg t "$(words "$1")" '{type:"tool_use",name:"Write",input:{file_path:"/p/README.md",content:$t}}'; }
 edit() { jq -cn --arg o "$(words "$1")" --arg n "$(words "$2")" '{type:"tool_use",name:"Edit",input:{file_path:"/p/README.md",old_string:$o,new_string:$n}}'; }
-SHARPEN='{"type":"tool_use","name":"Skill","input":{"skill":"copywriter"}}'
+SHARPEN='{"type":"tool_use","name":"Skill","input":{"skill":"writing"}}'
 NEXT='{"type":"user","message":{"content":"apply it"}}'
 META='{"type":"user","isMeta":true,"message":{"content":"[Image: original 390x2600]"}}'
 
-SG="python3 $HOOKS/../skills/copywriter/hooks/sharpen-gate.py"
+SG="python3 $HOOKS/../skills/writing/hooks/sharpen-gate.py"
 transcript "$(readme 200)"
 check "sharpen: long README"        "$SG" "$(stop_payload)" '"block"'
 check "sharpen: already active"     "$SG" "$(stop_payload true)" silent
@@ -165,7 +165,7 @@ transcript "$(readme 200)" "$SHARPEN"
 check "sharpen: ran already"        "$SG" "$(stop_payload)" silent
 transcript "$(readme 200)" '{"type":"tool_use","name":"Skill","input":{"skill":"sharpen"}}'
 check "sharpen: ran under its old name"    "$SG" "$(stop_payload)" silent
-transcript "$(readme 200)" '{"type":"tool_use","name":"Skill","input":{"skill":"anthropic-skills:copywriter"}}'
+transcript "$(readme 200)" '{"type":"tool_use","name":"Skill","input":{"skill":"anthropic-skills:writing"}}'
 check "sharpen: ran via claude.ai"  "$SG" "$(stop_payload)" silent
 transcript "$(readme 60)"
 check "sharpen: short"              "$SG" "$(stop_payload)" silent

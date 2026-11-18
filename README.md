@@ -37,7 +37,7 @@ Eighteen skills, each a folder in `skills/` with a `SKILL.md`. Claude loads one 
 | [wtf](skills/wtf/SKILL.md) | Explains the last message, a file or a passage in plain language, when I type `/wtf` |
 | [sync-docs](skills/sync-docs/SKILL.md) | Finds where the docs, guidelines and copy have drifted from the code, with `file:line` evidence, and fixes on my word |
 | [repo-docs](skills/repo-docs/SKILL.md) | My standard for READMEs, changelogs, commit messages, versions and `.github` files |
-| [copywriter](skills/copywriter/SKILL.md) | Writes a product page from facts in Apple's style, and sharpens any draft: names each AI pattern, quotes the line and gives the fix, then rewrites on my word. On Claude's own copy it fixes without asking |
+| [writing](skills/writing/SKILL.md) | Writes as me (posts, LinkedIn, mails in my name), writes a product page from facts in Apple's style, and sharpens any draft: names each AI pattern, quotes the line and gives the fix, then rewrites on my word. On Claude's own copy it fixes without asking |
 | [mail](skills/mail/SKILL.md) | Drafts, replies and forwards in Apple Mail: the copy check before the draft, a plain body, anything with accents or formatting as an attachment, and a check of the draft before it goes |
 | [ui](skills/ui/SKILL.md) | Craft for surfaces, typography and feel, which library to pick, and how to review an interface |
 | [motion](skills/motion/SKILL.md) | Names an effect, finds what should animate, reviews animation code and plans motion work |
@@ -52,14 +52,16 @@ Eighteen skills, each a folder in `skills/` with a `SKILL.md`. Claude loads one 
 To take one, copy its folder into your own `~/.claude/skills/`, or let the [skills CLI](https://github.com/vercel-labs/skills) do it:
 
 ```bash
-npx skills add mischasigtermans/dotclaude --skill copywriter
+npx skills add mischasigtermans/dotclaude --skill writing
 ```
 
 A skill brings no tools of its own. solo, lead and panel need [Solo](https://soloterm.com), laravel-forge the `forge` CLI, cloud-database the `cloud` CLI and `mysql`, mail the macuse Apple Mail connector, security-audit Node for its two validators, retro Python 3 for its session reader, and design-pack a [ui.sh](https://ui.sh) account with its MCP server connected. finish uses the `laravel@laravel` plugin for its simplify step, and Personas with Parley for its review.
 
-copywriter carries its own Stop hook, [`sharpen-gate.py`](skills/copywriter/hooks/sharpen-gate.py): once Claude wrote 150 or more words of prose to `.md`, `.mdx` or `.txt` files in a turn, or 50 or more words a visitor reads in a template or in a `lang` or `content` file, that copy goes through the skill's sharpen mode before the turn ends. Scratch files, memory notes and panel run folders don't count. Claude Code loads the folder as the plugin `copywriter@skills-dir`, and the skill keeps its plain name.
+writing's personal mode reads `~/.claude/writing-context.md` when it exists: a private file, outside this repo, that says where my facts and published writing live. Without it, as in Claude Desktop, the mode writes from its own file and asks for every fact.
 
-copywriter and mail don't need Claude Code. Claude Desktop takes them as uploaded skills; for copywriter, zip the folder without `.claude-plugin` and `hooks`, which are Claude Code's.
+writing carries its own Stop hook, [`sharpen-gate.py`](skills/writing/hooks/sharpen-gate.py): once Claude wrote 150 or more words of prose to `.md`, `.mdx` or `.txt` files in a turn, or 50 or more words a visitor reads in a template or in a `lang` or `content` file, that copy goes through the skill's sharpen mode before the turn ends. Scratch files, memory notes and panel run folders don't count. Claude Code loads the folder as the plugin `writing@skills-dir`, and the skill keeps its plain name.
+
+writing and mail don't need Claude Code. Claude Desktop takes them as uploaded skills; for writing, zip the folder without `.claude-plugin` and `hooks`, which are Claude Code's.
 
 On my machine `skills/` also holds what tools put there: clauset's two skills, the ones from Rex and Aside, and the skills Claude syncs from claude.ai. Those stay out of the repo.
 
@@ -73,6 +75,7 @@ On my machine `skills/` also holds what tools put there: clauset's two skills, t
 - Context filling up: `handoff`.
 - Every week or two per active repo, or when the same gotcha keeps coming back: `retro`.
 - Lost in a long answer: `/wtf`.
+- Decisions piling up in a session: `/interview`.
 
 ## Hooks
 
@@ -87,7 +90,7 @@ On my machine `skills/` also holds what tools put there: clauset's two skills, t
 | [`php-format.py`](hooks/php-format.py) | PostToolUse, Stop | Notes edited PHP files (never Blade); at Stop runs Pint on them and PHPStan, blocks on errors |
 | [`dash-lint.py`](hooks/dash-lint.py) | PostToolUse Edit/Write | Flags em dashes, en dashes and middle dots in copy. Panel run folders hold other agents' text and are left alone |
 
-`bash hooks/tests/run.sh` pipes fake payloads through every hook, copywriter's gate included, and asserts on the output. A hook that exits non-zero fails its check, so a moved script can't pass as silence. All hooks fail open: an internal error never blocks a tool call.
+`bash hooks/tests/run.sh` pipes fake payloads through every hook, writing's gate included, and asserts on the output. A hook that exits non-zero fails its check, so a moved script can't pass as silence. All hooks fail open: an internal error never blocks a tool call.
 
 ## Evals
 
@@ -121,7 +124,7 @@ A rule drops in with a one-liner:
 curl -fsSL https://raw.githubusercontent.com/mischasigtermans/dotclaude/main/rules/orchestration.md -o ~/.claude/rules/orchestration.md
 ```
 
-A hook needs its file and its entry in `settings.json`; copywriter's comes with its folder. The status line needs `ccstatusline` installed globally (`npm install -g ccstatusline`; the wrapper calls it by its Homebrew path) and set to show the context-percentage widget alone, since the wrapper reads its whole output as one number, and clauset for the account name.
+A hook needs its file and its entry in `settings.json`; writing's comes with its folder. The status line needs `ccstatusline` installed globally (`npm install -g ccstatusline`; the wrapper calls it by its Homebrew path) and set to show the context-percentage widget alone, since the wrapper reads its whole output as one number, and clauset for the account name.
 
 ## What stays out
 
@@ -144,7 +147,7 @@ Public instructions hold reusable preferences and methods. Project decisions bel
 - [Mischa Sigtermans](https://github.com/mischasigtermans)
 - The rules in CLAUDE.md on changes that trace to the request, the minimum implementation and a check for every step come from [Andrej Karpathy's notes on LLM coding](https://x.com/karpathy/status/2015883857489522876), via [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills).
 - The hook set and its tests take their shape from [affaan-m/ECC](https://github.com/affaan-m/ECC).
-- copywriter's sharpen mode started from [Peter Yang](https://github.com/petergyang)'s [no-ai-slop](https://github.com/petergyang/no-ai-slop). Its write mode builds on two analyses of Apple's product pages, by Enchanting Marketing and Widewail, and on the honesty rules in [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills). ui and motion started from the skills [Emil Kowalski](https://github.com/emilkowalski) and [Jakub Krehel](https://github.com/jakubkrehel) published. The text and the examples here are written new.
+- writing's sharpen mode started from [Peter Yang](https://github.com/petergyang)'s [no-ai-slop](https://github.com/petergyang/no-ai-slop). Its write mode builds on two analyses of Apple's product pages, by Enchanting Marketing and Widewail, and on the honesty rules in [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills). ui and motion started from the skills [Emil Kowalski](https://github.com/emilkowalski) and [Jakub Krehel](https://github.com/jakubkrehel) published. The text and the examples here are written new.
 - retro, diagnose, wtf and the lesson step in finish take their method from the compound, retro, debug and wtf skills in [Every](https://every.to)'s [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) plugin (MIT). wtf follows theirs closely; the rest is written new.
 
 ## License

@@ -9,7 +9,7 @@ Two patterns below are allowed in the headline of a product page, and only there
 - **Fragments.** A headline may be a fragment or a short run of them: 'Mute the commute.', 'Your roster. Your rates. Your rider.' This overrides dramatic fragmentation.
 - **Paired opposites.** A headline may set two true facts about the product against each other: 'More range. Less weight.' Both halves must be claims the page proves. This overrides binary contrasts. A staged denial ('It's not X. It's Y.') knocks down a belief nobody held and stays out, headline or not.
 
-Outside product pages there are no exceptions.
+Outside product pages, the only exceptions are personal mode's: when writing as Mischa, the section 'Where his moves meet patterns.md' in `personal.md` decides which of his own moves stay. Everywhere else there are none.
 
 ## The patterns
 

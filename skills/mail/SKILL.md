@@ -15,7 +15,7 @@ The macuse Apple Mail tools (`mail_reply_message`, `mail_compose_message`, `mail
 
 ## Before the draft
 
-Write the body and any attachment text first, then call the Skill tool with `copywriter` and run its sharpen mode in self-check over them. Fix every hit before a compose tool is called: a draft in Mail is already past the copy gate, which only sees files. A mail the user wrote or dictated word for word gets the diagnosis instead, never a silent rewrite.
+Write the body and any attachment text first, then call the Skill tool with `writing`: draft in its personal mode, since the mail goes out in the user's name, and run its sharpen mode in self-check over the result. Fix every hit before a compose tool is called: a draft in Mail is already past the copy gate, which only sees files. A mail the user wrote or dictated word for word gets the diagnosis instead, never a silent rewrite.
 
 ## Sending
 

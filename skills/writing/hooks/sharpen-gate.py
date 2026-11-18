@@ -56,7 +56,7 @@ def turns(transcript_path):
 
 
 def is_sharpen(call):
-    return call.get('name') == 'Skill' and call.get('input', {}).get('skill', '').split(':')[-1] in ('copywriter', 'sharpen')
+    return call.get('name') == 'Skill' and call.get('input', {}).get('skill', '').split(':')[-1] in ('writing', 'sharpen')
 
 
 def props(tag):
@@ -143,7 +143,7 @@ def main():
             'decision': 'block',
             'reason': f'{written + in_templates} words of new copy in '
                       f'{", ".join(os.path.basename(target) for target in targets)}. '
-                      'Run the copywriter skill on it before you finish.',
+                      'Run the writing skill on it before you finish.',
         }))
 
 

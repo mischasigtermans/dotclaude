@@ -23,7 +23,7 @@ On a detect request, the response names every pattern it found, with the quoted 
 
 ## Patterns to cut
 
-On a product page, the two headline exceptions at the top of `patterns.md` hold: a headline fragment or a pair of true opposites passes these checks.
+On a product page, the two headline exceptions at the top of `patterns.md` hold: a headline fragment or a pair of true opposites passes these checks. In personal mode, a move `personal.md` keeps as earned ('Where his moves meet patterns.md') passes them too; the staged version still fails.
 
 1. Did you remove every throat-clearing opener, rhetorical setup, binary contrast and negative listing?
 2. Have you fixed every faux-insight setup, colon reveal, fake-strong verb and case of superficial analysis, synonym cycling, dramatic fragmentation or robotic rhythm?

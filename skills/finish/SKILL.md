@@ -36,7 +36,7 @@ If the repo has a `.ai/sync-docs.md`, call the Skill tool with `sync-docs`, scop
 
 ## 6. Copy
 
-The diff changes words a reader sees (a view, a lang or content file, a mail, a post, the prose of a doc): call the Skill tool with `copywriter` and run its sharpen mode in self-check, scoped to the diff. Skip it when the copy gate already sent this copy through the skill this session.
+The diff changes words a reader sees (a view, a lang or content file, a mail, a post, the prose of a doc): call the Skill tool with `writing` and run its sharpen mode in self-check, scoped to the diff. Skip it when the copy gate already sent this copy through the skill this session.
 
 ## 7. Format
 

@@ -1,0 +1,8 @@
+{
+  "name": "writing",
+  "version": "0.3.0",
+  "description": "Writes as Mischa, writes product copy and sharpens existing text. Sends the prose Claude wrote in a turn through sharpen mode before the turn ends.",
+  "author": {
+    "name": "Mischa Sigtermans"
+  }
+}
