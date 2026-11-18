@@ -26,7 +26,7 @@ Rules enter context when loaded; skill names and descriptions enter discovery co
 
 ## Skills
 
-Eighteen skills, each a folder in `skills/` with a `SKILL.md`. Claude loads one when the ask matches its description, or when I type its name.
+Nineteen skills, each a folder in `skills/` with a `SKILL.md`. Claude loads one when the ask matches its description, or when I type its name.
 
 | Skill | What it does |
 | --- | --- |
@@ -38,6 +38,7 @@ Eighteen skills, each a folder in `skills/` with a `SKILL.md`. Claude loads one 
 | [sync-docs](skills/sync-docs/SKILL.md) | Finds where the docs, guidelines and copy have drifted from the code, with `file:line` evidence, and fixes on my word |
 | [repo-docs](skills/repo-docs/SKILL.md) | My standard for READMEs, changelogs, commit messages, versions and `.github` files |
 | [writing](skills/writing/SKILL.md) | Writes as me (posts, LinkedIn, mails in my name), writes a product page from facts in Apple's style, and sharpens any draft: names each AI pattern, quotes the line and gives the fix, then rewrites on my word. On Claude's own copy it fixes without asking |
+| [research](skills/research/SKILL.md) | Researches a topic on the web and on X, each finding with its URL and date, the voices quoted verbatim and the counterpoints kept |
 | [mail](skills/mail/SKILL.md) | Drafts, replies and forwards in Apple Mail: the copy check before the draft, a plain body, anything with accents or formatting as an attachment, and a check of the draft before it goes |
 | [ui](skills/ui/SKILL.md) | Craft for surfaces, typography and feel, which library to pick, and how to review an interface |
 | [motion](skills/motion/SKILL.md) | Names an effect, finds what should animate, reviews animation code and plans motion work |
@@ -55,7 +56,7 @@ To take one, copy its folder into your own `~/.claude/skills/`, or let the [skil
 npx skills add mischasigtermans/dotclaude --skill writing
 ```
 
-A skill brings no tools of its own. solo, lead and panel need [Solo](https://soloterm.com), laravel-forge the `forge` CLI, cloud-database the `cloud` CLI and `mysql`, mail the macuse Apple Mail connector, security-audit Node for its two validators, retro Python 3 for its session reader, and design-pack a [ui.sh](https://ui.sh) account with its MCP server connected. finish uses the `laravel@laravel` plugin for its simplify step, and Personas with Parley for its review.
+A skill brings no tools of its own. research needs the Firecrawl MCP, and the hosted X MCP for X (setup in its `x-setup.md`). solo, lead and panel need [Solo](https://soloterm.com), laravel-forge the `forge` CLI, cloud-database the `cloud` CLI and `mysql`, mail the macuse Apple Mail connector, security-audit Node for its two validators, retro Python 3 for its session reader, and design-pack a [ui.sh](https://ui.sh) account with its MCP server connected. finish uses the `laravel@laravel` plugin for its simplify step, and Personas with Parley for its review.
 
 writing's personal mode reads `~/.claude/writing-context.md` when it exists: a private file, outside this repo, that says where my facts and published writing live. Without it, as in Claude Desktop, the mode writes from its own file and asks for every fact.
 
