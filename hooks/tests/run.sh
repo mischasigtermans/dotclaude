@@ -269,4 +269,16 @@ if command -v rtk >/dev/null; then
   check "rtk: rewrites git status" "$R" "$(bash_payload 'git status')" 'rtk'
 fi
 
+# The cloud agent runs under settings.cloud.json: every Python hook settings.json names, nothing that exists only on the Mac.
+CLOUD="$HOOKS/../settings.cloud.json"
+python_hooks() { jq -r '[.hooks[][].hooks[].command | select(startswith("python3 "))] | unique | .[]' "$1"; }
+if [ ! -f "$CLOUD" ]; then
+  echo "FAIL cloud: settings.cloud.json exists"; fail=1
+else
+  [ "$(python_hooks "$HOOKS/../settings.json")" = "$(python_hooks "$CLOUD")" ] \
+    && echo "ok   cloud: every Python hook" || { echo "FAIL cloud: every Python hook"; fail=1; }
+  grep -qE 'rtk|rex |clauset|statusline|/Users/' "$CLOUD" \
+    && { echo "FAIL cloud: nothing Mac-only"; fail=1; } || echo "ok   cloud: nothing Mac-only"
+fi
+
 exit $fail
