@@ -1,0 +1,116 @@
+{
+  "env": {
+    "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
+  "permissions": {
+    "allow": [],
+    "defaultMode": "auto"
+  },
+  "model": "fable",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/bash-guard.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/config-protect.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/ui-gate.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/memory-gate.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/scope-gate.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/php-format.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/dash-lint.py"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/php-format.py",
+            "timeout": 240
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "personas@by-mischa": true,
+    "steve-jobs@by-mischa": true,
+    "raymond-hettinger@by-mischa": true,
+    "taylor-otwell@by-mischa": true,
+    "david-tolnay@by-mischa": true,
+    "laravel@laravel": true,
+    "security-guidance@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "by-mischa": {
+      "source": {
+        "source": "github",
+        "repo": "mischasigtermans/by-mischa"
+      },
+      "autoUpdate": true
+    },
+    "laravel": {
+      "source": {
+        "source": "github",
+        "repo": "laravel/agent-skills"
+      }
+    }
+  },
+  "subagentPromptCacheTtl": "1h",
+  "effortLevel": "high",
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    },
+    "claude-fable-5-1": {
+      "effortLevel": "high"
+    },
+    "claude-fable-5-2": {
+      "effortLevel": "high"
+    }
+  },
+  "advisorModel": "fable",
+  "precomputeCompactionEnabled": true
+}

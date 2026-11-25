@@ -18,6 +18,7 @@
 
 # Allow shareable settings (no local overrides, no caches)
 !settings.json
+!settings.cloud.json
 !statusline-wrapper.sh
 !statusline-command.sh
 
